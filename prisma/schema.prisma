@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+provider = "prisma-client-js"
+// output   = "../@prisma/client"  // Removed to use default location
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+  PROFESSOR
+}
+
+enum TicketStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TicketReason {
+  SICKDAY
+  FAMILY
+  COMPETITION
+}
+
+model User {
+  id       String    @id @default(uuid())
+  login String  @unique
+  name     String
+  password String
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  courseId String?
+  group    Group?  @relation(fields: [groupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  groupId  String?
+  role     UserRole
+  tickets  Ticket[]
+}
+model Group {
+  id         String   @id @default(uuid())
+  identifier String   @unique
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   String
+  users      User[]
+}
+model Course {
+  id       String    @id @default(uuid())
+  name String
+  identifier Int @unique
+  groups Group[]
+  users User[]
+}
+
+model Ticket {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  reason      TicketReason
+  status      TicketStatus
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  prooves     Prove[]
+}
+
+model Prove {
+  id       String  @id @default(uuid())
+  name     String
+  path     String
+  ticket   Ticket  @relation(fields: [ticketId], references: [id])
+  ticketId String
+}

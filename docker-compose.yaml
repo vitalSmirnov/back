@@ -1,0 +1,11 @@
+services:
+  database:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "3306:5432"
+    environment:
+      - POSTGRES_USER: postgres
+      - POSTGRES_PASSWORD: 0000
+      - POSTGRES_DB: sickdays
+    restart: unless-stopped
