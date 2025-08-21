@@ -10,6 +10,5 @@ export interface Ticket {
   endDate?: string
   reason: ReasonEnum
   status: StatusEnum
-  userId: string
   prooves: Prove[]
 }

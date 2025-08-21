@@ -91,3 +91,18 @@ export function JwtAuth(req: Request, res: Response, next: NextFunction) {
     next()
   })
 }
+export function JwtRefreshAuth(req: Request, res: Response, next: NextFunction) {
+  const authCookie = req.cookies["refreshToken"]
+  const authToken = req.headers["authorization"]?.split("Bearer ")[1]
+
+  // If there is no cookie, return an error
+  if (authCookie == null && authToken == null) return res.sendStatus(401)
+
+  const authData = authCookie || authToken
+  jwt.verify(authData, ACCESS_TOKEN_SECRET, (err: any) => {
+    // If there is an error, return an error
+    if (err) return res.sendStatus(401)
+    req.headers.authorization = authData // Set the authorization header for downstream middleware
+    next()
+  })
+}

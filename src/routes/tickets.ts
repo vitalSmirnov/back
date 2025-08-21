@@ -6,12 +6,12 @@ import {
   ChangeTicketStatusPayload,
   CreateTicketInfoPayload,
   CreateTicketInfoResponse,
+  GetTicketResponse,
   GetTicketsPayload,
   GetTicketsResponse,
   UpdateTicketInfoPayload,
   UpdateTicketInfoResponse,
 } from "../domain/dto/Tickets/Tickets.js"
-import { Ticket } from "../domain/models/ticket.js"
 import { ReasonEnum } from "../domain/models/ReasonEnum.js"
 import prisma from "../prisma.js"
 import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
@@ -45,8 +45,8 @@ router.get(
                 id: true,
                 name: true,
                 role: true,
-                course: { select: { identifier: true } },
-                group: { select: { identifier: true } },
+                course: { select: { id: true, identifier: true, name: true } }, // added id
+                group: { select: { id: true, identifier: true } }, // added id
               },
             },
             prooves: true,
@@ -73,7 +73,12 @@ router.get(
       const tickets = await prisma.ticket.findMany({
         where: { userId: decoded?.id },
         include: {
-          user: true,
+          user: {
+            include: {
+              course: { select: { id: true, identifier: true, name: true } },
+              group: { select: { id: true, identifier: true } },
+            },
+          },
           prooves: true,
         },
       })
@@ -94,13 +99,18 @@ router.get(
   }
 )
 
-router.get("/:id", async (req: Request, res: Response<Ticket | { error: string }>) => {
+router.get("/:id", async (req: Request, res: Response<GetTicketResponse | { error: string }>) => {
   try {
     const decoded = getRoleFromHeaders(req.headers.authorization!)
     const ticket = await prisma.ticket.findUnique({
       where: { id: req.params.id },
       include: {
-        user: true,
+        user: {
+          include: {
+            course: { select: { id: true, identifier: true, name: true } },
+            group: { select: { id: true, identifier: true } },
+          },
+        },
         prooves: true,
       },
     })
@@ -112,13 +122,14 @@ router.get("/:id", async (req: Request, res: Response<Ticket | { error: string }
       decoded?.role === UserRoleEnum.PROFESSOR ||
       ticket.userId === decoded?.id
     ) {
-      return res.json({
+      const response: GetTicketResponse = {
         ...ticket,
         reason: ticket.reason as ReasonEnum,
         status: ticket.status as StatusEnum,
         startDate: ticket.startDate.toISOString(),
         endDate: ticket.endDate.toISOString(),
-      })
+      }
+      return res.json(response)
     }
 
     return res.status(403).json({ error: "Forbidden" })
@@ -168,7 +179,6 @@ router.post(
         endDate: ticket.endDate.toISOString(),
         reason: ticket.reason as ReasonEnum,
         status: ticket.status as StatusEnum,
-        userId: ticket.userId,
         prooves: ticket.prooves.map(p => ({
           id: p.id,
           name: p.name,
@@ -228,9 +238,9 @@ router.put(
           endDate: updatedTicket.endDate.toISOString(),
         }
         return res.json(response)
+      } else {
+        return res.status(403).json({ error: "Forbidden" })
       }
-
-      return res.status(403).json({ error: "Forbidden" })
     } catch (error) {
       console.error("Error updating ticket:", error)
       return res.status(500).json({ error: "Internal server error" })

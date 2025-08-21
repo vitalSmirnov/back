@@ -121,45 +121,46 @@ router.post(
 )
 
 // Refresh token endpoint
-router.post("/refresh", async (req: Request, res: Response<TokenResponse | { error: string }>) => {
-  try {
-    const cookies = req.headers.cookie
-    const refreshToken = cookies?.match(/refreshToken=([^;]+)/)?.[1]
-    console.log("Refresh token:", req.headers.cookie)
-    console.log("Refresh token:", refreshToken)
+router.post(
+  "/refresh",
+  async (req: Request<{}, {}, { refreshToken: string }>, res: Response<TokenResponse | { error: string }>) => {
+    try {
+      const cookies = req.headers.cookie
+      const refreshToken = cookies?.match(/refreshToken=([^;]+)/)?.[1] || req.body.refreshToken
 
-    if (!refreshToken) {
-      return res.status(400).json({ error: "Refresh token is required" })
+      if (!refreshToken) {
+        return res.status(400).json({ error: "Refresh token is required" })
+      }
+
+      // Verify refresh token
+      const decoded = getRoleFromHeaders(refreshToken)
+
+      console.log("Decoded refresh token:", decoded)
+
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          login: true,
+          name: true,
+          role: true,
+        },
+      })
+
+      if (!user) {
+        return res.status(401).json({ error: "User not found" })
+      }
+
+      const tokens = createTokens(user)
+      setAuthCookies(res, tokens)
+
+      res.status(201).json(tokens)
+    } catch (error) {
+      console.error("Error refreshing token:", error)
+      return res.status(500).json({ error: "Internal server error" })
     }
-
-    // Verify refresh token
-    const decoded = getRoleFromHeaders(refreshToken)
-
-    console.log("Decoded refresh token:", decoded)
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        login: true,
-        name: true,
-        role: true,
-      },
-    })
-
-    if (!user) {
-      return res.status(401).json({ error: "User not found" })
-    }
-
-    const tokens = createTokens(user)
-    setAuthCookies(res, tokens)
-
-    res.status(201).json(tokens)
-  } catch (error) {
-    console.error("Error refreshing token:", error)
-    return res.status(500).json({ error: "Internal server error" })
   }
-})
+)
 
 // Logout endpoint
 router.post("/logout", JwtAuth, async (req: Request, res: Response) => {
