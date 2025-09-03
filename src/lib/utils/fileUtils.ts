@@ -1,8 +1,8 @@
-import fs from 'fs'
-import path from 'path'
+import fs from "fs"
+import path from "path"
 
-const uploadsDir = path.join(process.cwd(), 'uploads')
-const provesDir = path.join(uploadsDir, 'proves')
+const uploadsDir = path.join(process.cwd(), "uploads")
+const provesDir = path.join(uploadsDir, "proves")
 
 export interface FileInfo {
   originalName: string
@@ -16,15 +16,15 @@ export function getFileInfo(file: Express.Multer.File): FileInfo {
   return {
     originalName: file.originalname,
     filename: file.filename,
-    path: file.path,
+    path: file.path, // Store relative path and normalize for cross-platform
     size: file.size,
-    mimetype: file.mimetype
+    mimetype: file.mimetype,
   }
 }
 
 export function deleteFile(filePath: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    fs.unlink(filePath, (err) => {
+    fs.unlink(filePath, err => {
       if (err) {
         reject(err)
       } else {
@@ -56,21 +56,25 @@ export function getFileExtension(filename: string): string {
 }
 
 export function isImageFile(mimetype: string): boolean {
-  const imageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  const imageTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
   return imageTypes.includes(mimetype)
 }
 
 export function isDocumentFile(mimetype: string): boolean {
-  const docTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+  const docTypes = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ]
   return docTypes.includes(mimetype)
 }
 
-export function getFileType(mimetype: string): 'image' | 'document' {
+export function getFileType(mimetype: string): "image" | "document" {
   if (isImageFile(mimetype)) {
-    return 'image'
+    return "image"
   }
   if (isDocumentFile(mimetype)) {
-    return 'document'
+    return "document"
   }
-  return 'document' // fallback
-} 
+  return "document" // fallback
+}

@@ -12,7 +12,7 @@ export interface UserPayload {
 export interface UserResponse {
   id: string
   name: string
-  role: UserRole
+  role: UserRole[]
   login: string
   course?: number
   group?: string
@@ -23,7 +23,7 @@ export interface UserListPayload extends Pagination {
   userName?: string
   course?: string
   group?: string
-  role?: UserRole
+  role?: UserRole[]
 }
 export interface UserListResponse extends WithTotal {
   users: UserResponse[]

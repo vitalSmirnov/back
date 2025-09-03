@@ -25,10 +25,15 @@ router.get(
     try {
       console.log("Fetching users with query:", req.query)
       const { userName, group, limit, offset, role, course } = req.query
+
+      // Build a Prisma-compatible Enum list filter for the `role` field.
+      // Prisma expects an object like { hasSome: [...] } for enum list filters.
+      const roleFilter: any = role ? { hasSome: Array.isArray(role) ? role : [role] } : undefined
+
       const users = await prisma.user.findMany({
         where: {
           name: { contains: userName },
-          role: role,
+          role: roleFilter,
           courseId: { contains: course, mode: "insensitive" },
           groupId: { contains: group, mode: "insensitive" },
         },
@@ -48,7 +53,7 @@ router.get(
           id: user.id,
           login: user.login,
           name: user.name,
-          role: user.role as UserRoleEnum,
+          role: roleFilter,
           course: user.course?.identifier,
           group: user.group?.identifier,
           tickets: (user.tickets || []).map((ticket: any) => ({
@@ -92,7 +97,7 @@ router.get(
         id: user.id,
         login: user.login,
         name: user.name,
-        role: user.role as UserRoleEnum,
+        role: [...user.role],
         course: user.course?.identifier,
         group: user.group?.identifier,
         tickets: (user.tickets || []).map((ticket: any) => ({
@@ -150,7 +155,7 @@ router.patch(
 
       const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: { role },
+        data: { role: [role] },
         include: { course: true, group: true },
       })
 
@@ -158,7 +163,7 @@ router.patch(
         id: updatedUser.id,
         login: updatedUser.login,
         name: updatedUser.name,
-        role: updatedUser.role as UserRoleEnum,
+        role: updatedUser.role,
         course: updatedUser.course?.identifier,
         group: updatedUser.group?.identifier,
       })
@@ -182,6 +187,7 @@ router.get("/me/info", async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
+        id: true,
         login: true,
         name: true,
         role: true,

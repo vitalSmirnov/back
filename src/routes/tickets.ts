@@ -20,13 +20,26 @@ import { JwtAuth } from "../lib/utils/authHelpers.js"
 const router = express.Router()
 router.use(JwtAuth)
 
+// helper to normalize prove path/file binary into a safe string for JSON responses
+const encodeProvePath = (p: any): string => {
+  // p may be { path: Buffer|Uint8Array|string } or { file: { res: Buffer|Uint8Array } }
+  if (!p) return ""
+  const val = p.path ?? p.file?.res ?? p.file?.path
+  if (!val) return ""
+  // Buffer or Uint8Array -> base64, otherwise stringify
+  if (typeof Buffer !== "undefined" && (Buffer.isBuffer(val) || val instanceof Uint8Array)) {
+    return Buffer.from(val).toString("base64")
+  }
+  return String(val)
+}
+
 router.get(
   "/",
   async (req: Request<{}, {}, {}, GetTicketsPayload>, res: Response<GetTicketsResponse | { error: string }>) => {
     try {
       const decoded = getRoleFromHeaders(req.headers.authorization!)
-      const { userName, startDate, endDate, offset, limit, reason } = req.query
-      if (decoded?.role === UserRoleEnum.PROFESSOR || decoded?.role === UserRoleEnum.ADMIN) {
+      const { userName, startDate, endDate, offset, limit, reason, status } = req.query
+      if (decoded?.role.includes(UserRoleEnum.PROFESSOR) || decoded?.role.includes(UserRoleEnum.ADMIN)) {
         const tickets = await prisma.ticket.findMany({
           where: {
             user: {
@@ -36,6 +49,7 @@ router.get(
               },
             },
             reason: reason,
+            status: status,
             endDate: endDate ? { lte: new Date(endDate) } : undefined,
             startDate: { gte: startDate ? new Date(startDate) : undefined },
           },
@@ -65,9 +79,15 @@ router.get(
             endDate: ticket.endDate.toISOString(),
             reason: ticket.reason as ReasonEnum,
             status: ticket.status as StatusEnum,
+            prooves: ticket.prooves.map(p => ({
+              id: p.id,
+              name: p.name,
+              // normalize any binary into a base64 string for JSON
+              path: encodeProvePath(p),
+            })),
           })),
           total: tickets.length,
-        })
+        } as unknown as GetTicketsResponse)
       }
 
       const tickets = await prisma.ticket.findMany({
@@ -79,7 +99,9 @@ router.get(
               group: { select: { id: true, identifier: true } },
             },
           },
-          prooves: true,
+          prooves: {
+            select: { id: true, name: true, path: true },
+          },
         },
       })
       return res.json({
@@ -89,9 +111,14 @@ router.get(
           endDate: ticket.endDate.toISOString(),
           reason: ticket.reason as ReasonEnum,
           status: ticket.status as StatusEnum,
+          prooves: ticket.prooves.map(p => ({
+            id: p.id,
+            name: p.name,
+            path: p.path,
+          })),
         })),
         total: tickets.length,
-      })
+      } as unknown as GetTicketsResponse)
     } catch (error) {
       console.error("Error fetching tickets:", error)
       return res.status(500).json({ error: "Internal server error" })
@@ -104,23 +131,33 @@ router.get("/:id", async (req: Request, res: Response<GetTicketResponse | { erro
     const decoded = getRoleFromHeaders(req.headers.authorization!)
     const ticket = await prisma.ticket.findUnique({
       where: { id: req.params.id },
-      include: {
+      select: {
+        userId: false, // keep userId for authorization check
+        id: true,
+        name: true,
+        description: true,
+        startDate: true,
+        endDate: true,
+        reason: true,
+        status: true,
         user: {
           include: {
             course: { select: { id: true, identifier: true, name: true } },
             group: { select: { id: true, identifier: true } },
           },
         },
-        prooves: true,
+        prooves: {
+          select: { id: true, name: true, path: true },
+        },
       },
     })
 
     if (!ticket) return res.status(404).json({ error: "Not found" })
 
     if (
-      decoded?.role === UserRoleEnum.ADMIN ||
-      decoded?.role === UserRoleEnum.PROFESSOR ||
-      ticket.userId === decoded?.id
+      decoded?.role.includes(UserRoleEnum.ADMIN) ||
+      decoded?.role.includes(UserRoleEnum.PROFESSOR) ||
+      ticket.user.id === decoded?.id
     ) {
       const response: GetTicketResponse = {
         ...ticket,
@@ -128,8 +165,13 @@ router.get("/:id", async (req: Request, res: Response<GetTicketResponse | { erro
         status: ticket.status as StatusEnum,
         startDate: ticket.startDate.toISOString(),
         endDate: ticket.endDate.toISOString(),
+        prooves: ticket.prooves.map(p => ({
+          id: p.id,
+          name: p.name,
+          path: p.path,
+        })),
       }
-      return res.json(response)
+      return res.json(response as unknown as GetTicketResponse)
     }
 
     return res.status(403).json({ error: "Forbidden" })
@@ -142,7 +184,6 @@ router.get("/:id", async (req: Request, res: Response<GetTicketResponse | { erro
 // create ticket endpoint
 router.post(
   "/",
-  isUser,
   async (
     req: Request<{ id: string }, {}, CreateTicketInfoPayload>,
     res: Response<CreateTicketInfoResponse | { error: string }>
@@ -152,7 +193,25 @@ router.post(
     if (!decoded?.id) return res.status(401).json({ error: "Unauthorized" })
 
     try {
-      const { name, description, startDate, endDate, reason } = req.body
+      const { name, description, startDate, endDate, reason, prooves } = req.body
+
+      const proovesCreate =
+        Array.isArray(req.body.prooves) && req.body.prooves.length > 0
+          ? {
+              deleteMany: {},
+              createMany: {
+                data: req.body.prooves.map((item: any, index: number) => ({
+                  name: `Prove for ticket ${req.params.id} - ${index + 1}`,
+                  path: item,
+                })),
+              },
+            }
+          : Array.isArray(req.body.prooves) && req.body.prooves.length === 0
+          ? {
+              // empty array provided -> remove all existing prooves
+              deleteMany: {},
+            }
+          : undefined
 
       const ticket = await prisma.ticket.create({
         data: {
@@ -162,11 +221,14 @@ router.post(
           endDate: new Date(endDate),
           reason: reason || ReasonEnum.SICKDAY,
           status: StatusEnum.PENDING,
-          userId: decoded!.id, // <-- non-null asserted here
+          userId: decoded!.id,
+          prooves: proovesCreate,
         },
         include: {
           user: true,
-          prooves: true,
+          prooves: {
+            select: { id: true, name: true, path: true },
+          },
         },
       })
 
@@ -183,11 +245,10 @@ router.post(
           id: p.id,
           name: p.name,
           path: p.path,
-          ticketId: p.ticketId,
         })),
       }
 
-      res.status(201).json(response)
+      res.status(201).json(response as unknown as CreateTicketInfoResponse)
     } catch (error) {
       console.error("Error creating ticket:", error)
       return res.status(500).json({ error: "Internal server error" })
@@ -206,36 +267,70 @@ router.put(
       const decoded = getRoleFromHeaders(req.headers.authorization!)
 
       const ticket = await prisma.ticket.findUnique({
-        where: { id: req.params.id, NOT: { status: StatusEnum.APPROVED } },
+        where: { id: req.params.id },
       })
 
       if (!ticket) return res.status(404).json({ error: "Not found" })
+      if (ticket.status !== StatusEnum.PENDING) return res.status(403).json({ error: "Not avialable to edit" })
 
-      if (decoded?.role === UserRoleEnum.ADMIN || ticket.userId === decoded?.id) {
+      if (decoded?.role.includes(UserRoleEnum.ADMIN) || ticket.userId === decoded?.id) {
+        // build update fields and convert date strings to Date objects
+        const updateData: any = {
+          name: req.body.name,
+          description: req.body.description,
+          reason: req.body.reason,
+          endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+        }
+
+        // remove undefined fields so Prisma won't try to set them
+        Object.keys(updateData).forEach(key => {
+          if (updateData[key] === undefined) delete updateData[key]
+        })
+
+        // prepare nested prooves update to replace existing ones
+        const proovesUpdate =
+          Array.isArray(req.body.prooves) && req.body.prooves.length > 0
+            ? {
+                deleteMany: {},
+                createMany: {
+                  data: req.body.prooves.map((item: any, index: number) => ({
+                    name: `Prove for ticket ${req.params.id} - ${index + 1}`,
+                    path: item,
+                  })),
+                },
+              }
+            : Array.isArray(req.body.prooves) && req.body.prooves.length === 0
+            ? {
+                // empty array provided -> remove all existing prooves
+                deleteMany: {},
+              }
+            : undefined
+
         const updatedTicket = await prisma.ticket.update({
           where: { id: req.params.id },
           data: {
-            ...req.body,
-            prooves: {
-              set: req.body.prooves?.map(item => ({
-                id: item.id,
-                name: item.name,
-                path: item.path,
-              })),
-            },
+            ...updateData,
+            prooves: proovesUpdate,
           },
           include: {
             user: true,
-            prooves: true,
+            prooves: {
+              select: { id: true, name: true, path: true },
+            },
           },
         })
-        // Convert Date fields to strings for the UpdateTicketInfoResponse DTO
+
         const response: UpdateTicketInfoResponse = {
           ...updatedTicket,
           status: updatedTicket.status as StatusEnum,
           reason: updatedTicket.reason as ReasonEnum,
           startDate: updatedTicket.startDate.toISOString(),
           endDate: updatedTicket.endDate.toISOString(),
+          prooves: updatedTicket.prooves.map(p => ({
+            id: p.id,
+            name: p.name,
+            path: p.path,
+          })),
         }
         return res.json(response)
       } else {
@@ -248,7 +343,7 @@ router.put(
   }
 )
 
-router.delete("/:id", isUser, async (req: Request, res: Response) => {
+router.delete("/:id", isUser, async (req: Request<{ id: string }>, res: Response) => {
   const decoded = getRoleFromHeaders(req.headers.authorization!)
 
   try {
@@ -288,7 +383,7 @@ router.patch(
       }
 
       const ticket = await prisma.ticket.findUnique({
-        where: { id: req.params.id, NOT: { status: StatusEnum.APPROVED } }, // Prevent status change for approved tickets
+        where: { id: req.params.id, NOT: { status: status } },
       })
 
       if (!ticket) return res.status(404).json({ error: "Ticket not found" })
@@ -302,9 +397,15 @@ router.patch(
         },
       })
 
-      res.json({
+      // normalize prooves before returning
+      return res.json({
         ...updatedTicket,
         reason: updatedTicket.reason as ReasonEnum,
+        prooves: updatedTicket.prooves.map(p => ({
+          id: p.id,
+          name: p.name,
+          path: encodeProvePath(p),
+        })),
       })
     } catch (error) {
       console.error("Error updating ticket status:", error)

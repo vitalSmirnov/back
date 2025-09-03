@@ -1,7 +1,8 @@
+"use strict"
+
 import express from "express"
 import routes from "./routes.js"
 import cookieParser from "cookie-parser"
-
 import cors from "cors"
 
 const app = express()
@@ -15,8 +16,26 @@ app.use(
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   })
 )
+
 app.use(express.json())
-app.use("/api", routes)
+
+app.use(
+  "/uploads",
+  cors({
+    origin: "http://localhost:3000",
+  }),
+  express.static("uploads")
+)
+
+// fix the /api middleware signature to call next()
+app.use(
+  "/api",
+  (req, res, next) => {
+    console.log(req.path)
+    next()
+  },
+  routes
+)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)

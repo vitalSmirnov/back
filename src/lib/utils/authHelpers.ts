@@ -9,7 +9,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh_dev_se
 
 export interface JwtPayload {
   id: string
-  role: UserRole
+  role: UserRole[]
 }
 
 export function createTokens({ id, role }: Pick<User, "id" | "role">): TokenResponse {
@@ -49,33 +49,6 @@ function parseCookieHeader(cookieHeader?: string): Record<string, string> {
   return out
 }
 
-// Helper: get access token from request (Authorization header or cookies)
-function getTokenFromRequest(req: Request): string | null {
-  // 1) Authorization header
-  const authHeader = req.headers.authorization ?? (typeof req.get === "function" ? req.get("authorization") : undefined)
-  const fromAuth = extractBearerToken(authHeader)
-  if (fromAuth) return fromAuth
-
-  // 2) Cookies via cookie-parser
-  const candidateCookieNames = ["accessToken"]
-  const cookies: Record<string, unknown> | undefined = (req as any).cookies
-  if (cookies) {
-    for (const name of candidateCookieNames) {
-      const v = cookies[name]
-      if (typeof v === "string" && v) return v
-    }
-  }
-
-  // 3) Raw Cookie header fallback
-  const parsed = parseCookieHeader(req.headers.cookie)
-  for (const name of candidateCookieNames) {
-    const v = parsed[name]
-    if (typeof v === "string" && v) return v
-  }
-
-  return null
-}
-
 export function JwtAuth(req: Request, res: Response, next: NextFunction) {
   const authCookie = req.cookies["accessToken"]
   const authToken = req.headers["authorization"]?.split("Bearer ")[1]
@@ -92,17 +65,16 @@ export function JwtAuth(req: Request, res: Response, next: NextFunction) {
   })
 }
 export function JwtRefreshAuth(req: Request, res: Response, next: NextFunction) {
-  const authCookie = req.cookies["refreshToken"]
-  const authToken = req.headers["authorization"]?.split("Bearer ")[1]
+  const refreshCookie = req.cookies["refreshToken"]
+  const refreshToken = req.body.refreshToken
 
   // If there is no cookie, return an error
-  if (authCookie == null && authToken == null) return res.sendStatus(401)
+  if (refreshCookie == null && refreshToken == null) return res.sendStatus(401)
 
-  const authData = authCookie || authToken
-  jwt.verify(authData, ACCESS_TOKEN_SECRET, (err: any) => {
-    // If there is an error, return an error
+  const refreshData = refreshCookie || refreshToken
+  jwt.verify(refreshData, ACCESS_TOKEN_SECRET, (err: any) => {
     if (err) return res.sendStatus(401)
-    req.headers.authorization = authData // Set the authorization header for downstream middleware
+    req.headers.refreshToken = refreshData
     next()
   })
 }

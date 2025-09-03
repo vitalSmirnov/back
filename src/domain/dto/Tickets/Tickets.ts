@@ -15,6 +15,7 @@ export interface GetTicketsPayload extends Pagination {
   startDate?: Date
   endDate?: Date
   reason?: ReasonEnum
+  status?: StatusEnum
 }
 export interface GetTicketsResponse extends WithTotal {
   tickets: TicketLessUser[]
@@ -31,7 +32,7 @@ export interface UpdateTicketInfoPayload {
   endDate?: Date
   name?: string
   reason?: ReasonEnum
-  prooves?: Prove[]
+  prooves?: string[]
   description: string
 }
 export interface UpdateTicketInfoResponse extends Ticket {}
@@ -41,7 +42,7 @@ export interface CreateTicketInfoPayload {
   startDate: Date
   name?: string
   reason?: ReasonEnum
-  prooves?: Prove[]
+  prooves?: string[]
   description: string
 }
 export interface CreateTicketInfoResponse extends Ticket {}

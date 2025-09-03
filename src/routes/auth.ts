@@ -1,31 +1,13 @@
 import express, { Request, Response } from "express"
 import { LoginCredentials, RegisterCredentials } from "../domain/dto/Authorization/LoginCredentials.js"
 import { TokenResponse } from "../domain/dto/Authorization/TokenResponse.js"
-import { createTokens, JwtAuth } from "../lib/utils/authHelpers.js"
+import { createTokens, JwtAuth, JwtRefreshAuth } from "../lib/utils/authHelpers.js"
 import prisma from "../prisma.js"
 import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
+import { setAuthCookies } from "../lib/utils/createCookie.js"
+import { UserRole } from "@prisma/client"
 
 const router = express.Router()
-
-// Add cookie helpers
-const isProd = false
-const ACCESS_TOKEN_MAX_AGE_MS = isProd ? 15 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000 // isProd ? 15 minutes : 30 days
-const REFRESH_TOKEN_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000 // 30 days
-
-const setAuthCookies = (res: Response, tokens: TokenResponse) => {
-  res.cookie("accessToken", tokens.accessToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: isProd,
-    maxAge: ACCESS_TOKEN_MAX_AGE_MS,
-  })
-  res.cookie("refreshToken", tokens.refreshToken, {
-    httpOnly: true,
-    secure: isProd,
-    path: "localhost/*",
-    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
-  })
-}
 
 // Register endpoint
 router.post(
@@ -36,7 +18,7 @@ router.post(
       // Validate required fields
       if (!login || !name || !password) {
         return res.status(400).json({
-          error: "Missing required fields: login, name, password, role",
+          error: "Неправильный запрос, отсутствуют логин, имя или пароль",
         })
       }
 
@@ -45,7 +27,7 @@ router.post(
       })
 
       if (existingUser) {
-        return res.status(409).json({ error: "User with this login already exists" })
+        return res.status(409).json({ error: "Логин уже используется" })
       }
 
       const user = await prisma.user.create({
@@ -53,7 +35,7 @@ router.post(
           login,
           name,
           password,
-          role: "STUDENT",
+          role: [UserRole.STUDENT],
           course: { connect: { id: course } },
           group: { connect: { id: group } },
         },
@@ -72,7 +54,7 @@ router.post(
       res.status(201).json(tokens)
     } catch (error) {
       console.error("Error registering user:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      return res.status(500).json({ error: "Ошибка регистрации, попробуйте снова позже" })
     }
   }
 )
@@ -87,7 +69,7 @@ router.post(
       // Validate required fields
       if (!login || !password) {
         return res.status(400).json({
-          error: "Missing required fields: login, password",
+          error: "Неправильный запрос, отсутствуют логин или пароль",
         })
       }
 
@@ -102,20 +84,21 @@ router.post(
           password: true,
         },
       })
+      console.log(user)
 
       if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" })
+        return res.status(401).json({ error: "Пользователь с таким логином не существует" })
       }
       if (password !== user.password) {
-        return res.status(401).json({ error: "Invalid credentials" })
+        return res.status(401).json({ error: "Неправильный пароль или логин" })
       }
 
       const tokens = createTokens(user)
       setAuthCookies(res, tokens)
-      res.status(201).json(tokens)
+      res.status(200).json(tokens)
     } catch (error) {
       console.error("Error logging in:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      return res.status(500).json({ error: "Ошибка сервера, попробуйте снова" })
     }
   }
 )
@@ -123,38 +106,40 @@ router.post(
 // Refresh token endpoint
 router.post(
   "/refresh",
+  JwtRefreshAuth,
   async (req: Request<{}, {}, { refreshToken: string }>, res: Response<TokenResponse | { error: string }>) => {
     try {
-      const cookies = req.headers.cookie
-      const refreshToken = cookies?.match(/refreshToken=([^;]+)/)?.[1] || req.body.refreshToken
+      const token = req.headers.refreshToken as string
 
-      if (!refreshToken) {
-        return res.status(400).json({ error: "Refresh token is required" })
+      const refreshData = req.body.refreshToken || token
+
+      if (!refreshData) {
+        return res.status(400).json({ error: "Отсутствует токен пользователя" })
       }
 
       // Verify refresh token
-      const decoded = getRoleFromHeaders(refreshToken)
+      const decoded = getRoleFromHeaders(refreshData)
 
-      console.log("Decoded refresh token:", decoded)
+      console.log("decoded Role", decoded)
+      console.log("token from headers", token)
+      console.log("token from body", refreshData)
 
       const user = await prisma.user.findUnique({
         where: { id: decoded.id },
         select: {
           id: true,
-          login: true,
-          name: true,
           role: true,
         },
       })
 
       if (!user) {
-        return res.status(401).json({ error: "User not found" })
+        return res.status(404).json({ error: "User not found" })
       }
 
       const tokens = createTokens(user)
       setAuthCookies(res, tokens)
 
-      res.status(201).json(tokens)
+      res.status(200).json(tokens)
     } catch (error) {
       console.error("Error refreshing token:", error)
       return res.status(500).json({ error: "Internal server error" })

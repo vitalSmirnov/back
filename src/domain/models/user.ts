@@ -7,7 +7,7 @@ export interface User {
   id: string
   login: string
   name: string
-  role: UserRole
+  role: UserRole[]
   course: Omit<Course, "users" | "groups"> | null
   group: Omit<Group, "users" | "course"> | null
   tickets?: Ticket[]
