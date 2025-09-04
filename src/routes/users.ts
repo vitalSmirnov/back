@@ -1,19 +1,26 @@
 import express, { type Request, type Response } from "express"
 import { isAdmin, isNotStudent } from "../middlewares/authMiddleware.js"
 import { JwtAuth } from "../lib/utils/authHelpers.js"
-import {
-  UserChangeRolePayload,
-  UserChangeRoleResponse,
-  UserListPayload,
-  UserListResponse,
-  UserPayload,
-  UserResponse,
-} from "../domain/dto/Users/UserResponse.js"
-import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import prisma from "../prisma.js"
+import { UserChangeRolePayload, UserChangeRoleResponse } from "../domain/dto/Users/UserResponse.js"
+
 import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
+import {
+  GetConcreteUserResponse,
+  GetUsersNamesPayload,
+  GetUsersNamesResponse,
+  GetUsersPayload,
+  GetUsersResponse,
+} from "./interfaces/users.js"
+import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
+import {
+  deleteUserService,
+  getConcreteUserService,
+  getUsersNameService,
+  getUsersService,
+  grantRoleService,
+  meInfoService,
+  rejectRoleService,
+} from "../services/usersService.js"
 
 const router = express.Router()
 router.use(JwtAuth)
@@ -21,52 +28,10 @@ router.use(JwtAuth)
 router.get(
   "/",
   isNotStudent,
-  async (req: Request<{}, {}, {}, UserListPayload>, res: Response<UserListResponse | { error: string }>) => {
+  async (req: Request<{}, {}, {}, GetUsersPayload>, res: Response<GetUsersResponse | ErrorResponse>) => {
     try {
-      console.log("Fetching users with query:", req.query)
-      const { userName, group, limit, offset, role, course } = req.query
-
-      // Build a Prisma-compatible Enum list filter for the `role` field.
-      // Prisma expects an object like { hasSome: [...] } for enum list filters.
-      const roleFilter: any = role ? { hasSome: Array.isArray(role) ? role : [role] } : undefined
-
-      const users = await prisma.user.findMany({
-        where: {
-          name: { contains: userName },
-          role: roleFilter,
-          courseId: { contains: course, mode: "insensitive" },
-          groupId: { contains: group, mode: "insensitive" },
-        },
-        include: {
-          course: true,
-          group: true,
-          tickets: {
-            include: { prooves: true },
-          },
-        },
-        skip: offset ? parseInt(offset) : 0,
-        take: limit ? parseInt(limit) : 100,
-      })
-
-      res.json({
-        users: users.map(user => ({
-          id: user.id,
-          login: user.login,
-          name: user.name,
-          role: roleFilter,
-          course: user.course?.identifier,
-          group: user.group?.identifier,
-          tickets: (user.tickets || []).map((ticket: any) => ({
-            ...ticket,
-            startDate: ticket.startDate.toISOString(),
-            endDate: ticket.endDate.toISOString(),
-            reason: ticket.reason as ReasonEnum,
-            status: ticket.status as StatusEnum,
-            prooves: ticket.prooves,
-          })),
-        })),
-        total: users.length,
-      })
+      const result = await getUsersService({ ...req.query })
+      res.status(200).json(result)
     } catch (error) {
       console.error("Error fetching users:", error)
       return res.status(500).json({ error: "Internal server error" })
@@ -75,40 +40,29 @@ router.get(
 )
 
 router.get(
-  "/:id",
+  "/existing",
   isNotStudent,
-  async (req: Request<{ id: string }, {}, UserPayload>, res: Response<UserResponse | { error: string }>) => {
+  async (req: Request<{}, {}, GetUsersNamesPayload>, res: Response<GetUsersNamesResponse | ErrorResponse>) => {
     try {
-      const { id } = req.params
-      const user = await prisma.user.findUnique({
-        where: { id },
-        include: {
-          course: true,
-          group: true,
-          tickets: { include: { prooves: true } },
-        },
-      })
+      const result = await getUsersNameService({})
+      res.status(200).json(result)
+    } catch (error) {
+      console.error("Error fetching users:", error)
+      return res.status(500).json({ error: "Internal server error" })
+    }
+  }
+)
 
-      if (!user) {
-        return res.status(404).json({ error: "User not found" })
-      }
+router.get(
+  "/:userId",
+  isNotStudent,
+  async (req: Request<{ userId: string }>, res: Response<GetConcreteUserResponse | ErrorResponse>) => {
+    try {
+      const { userId } = req.params
 
-      res.json({
-        id: user.id,
-        login: user.login,
-        name: user.name,
-        role: [...user.role],
-        course: user.course?.identifier,
-        group: user.group?.identifier,
-        tickets: (user.tickets || []).map((ticket: any) => ({
-          ...ticket,
-          startDate: ticket.startDate.toISOString(),
-          endDate: ticket.endDate.toISOString(),
-          reason: ticket.reason as ReasonEnum,
-          status: ticket.status as StatusEnum,
-          prooves: ticket.prooves,
-        })),
-      })
+      const result = await getConcreteUserService({ userId })
+
+      res.status(200).json(result)
     } catch (error) {
       console.error("Error fetching user:", error)
       return res.status(500).json({ error: "Internal server error" })
@@ -118,17 +72,9 @@ router.get(
 
 router.delete("/:id", isAdmin, async (req: Request, res: Response) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.params.id },
-    })
+    const result = await deleteUserService({ userId: req.params.id })
 
-    if (!user) return res.status(404).json({ error: "Not found" })
-
-    await prisma.user.delete({
-      where: { id: req.params.id },
-    })
-
-    res.status(204).end()
+    res.status(204).end(result)
   } catch (error) {
     console.error("Error deleting user:", error)
     return res.status(500).json({ error: "Internal server error" })
@@ -137,7 +83,7 @@ router.delete("/:id", isAdmin, async (req: Request, res: Response) => {
 
 // Grant role to user (Admin only)
 router.patch(
-  "/:id/role",
+  "/:id/role/grant",
   isAdmin,
   async (
     req: Request<{ id: string }, {}, UserChangeRolePayload>,
@@ -145,28 +91,31 @@ router.patch(
   ) => {
     try {
       const { role } = req.body
-      const userId = req.params.id
+      const id = req.params.id
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-      })
+      const result = await grantRoleService({ id, role })
 
-      if (!user) return res.status(404).json({ error: "User not found" })
+      res.status(204).json(result)
+    } catch (error) {
+      console.error("Error granting role:", error)
+      return res.status(500).json({ error: "Internal server error" })
+    }
+  }
+)
+router.patch(
+  "/:id/role/reject",
+  isAdmin,
+  async (
+    req: Request<{ id: string }, {}, UserChangeRolePayload>,
+    res: Response<UserChangeRoleResponse | { error: string }>
+  ) => {
+    try {
+      const { role } = req.body
+      const id = req.params.id
 
-      const updatedUser = await prisma.user.update({
-        where: { id: userId },
-        data: { role: [role] },
-        include: { course: true, group: true },
-      })
+      const result = await rejectRoleService({ id, role })
 
-      res.json({
-        id: updatedUser.id,
-        login: updatedUser.login,
-        name: updatedUser.name,
-        role: updatedUser.role,
-        course: updatedUser.course?.identifier,
-        group: updatedUser.group?.identifier,
-      })
+      res.status(204).json(result)
     } catch (error) {
       console.error("Error granting role:", error)
       return res.status(500).json({ error: "Internal server error" })
@@ -178,65 +127,15 @@ router.patch(
 router.get("/me/info", async (req: Request, res: Response) => {
   console.log("Headers:", req.headers)
   try {
-    const { id, role } = getRoleFromHeaders(req.headers.authorization!)
+    const { id } = getRoleFromHeaders(req.headers.authorization!)
 
     if (!id || id === "") {
       return res.status(401).json({ error: "Error in decoded token" })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        login: true,
-        name: true,
-        role: true,
-        course: true,
-        group: true,
-        tickets: {
-          include: {
-            prooves: true,
-          },
-        },
-      },
-    })
+    const result = await meInfoService({ id })
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" })
-    }
-
-    res.json({
-      ...user,
-      course: user.course?.identifier,
-      group: user.group?.identifier,
-    })
-  } catch (error) {
-    console.error("Error getting current user:", error)
-    return res.status(500).json({ error: "Internal server error" })
-  }
-})
-// Get current user endpoint
-router.get("/info", async (req: Request, res: Response) => {
-  console.log("Headers:", req)
-  try {
-    const token = req.headers.authorization
-    const decoded = getRoleFromHeaders(token!)
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-      select: {
-        id: true,
-        login: true,
-        name: true,
-        role: true,
-      },
-    })
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" })
-    }
-
-    res.json(user)
+    res.status(200).json(result)
   } catch (error) {
     console.error("Error getting current user:", error)
     return res.status(500).json({ error: "Internal server error" })

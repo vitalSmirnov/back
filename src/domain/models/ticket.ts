@@ -6,8 +6,8 @@ export interface Ticket {
   id: string
   name: string
   description: string
-  startDate: string
-  endDate?: string
+  startDate: Date
+  endDate: Date
   reason: ReasonEnum
   status: StatusEnum
   prooves: Prove[]

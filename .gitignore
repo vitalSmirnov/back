@@ -6,3 +6,5 @@ dist
 /generated/prisma
 
 /uploads/
+
+/prisma/migrations

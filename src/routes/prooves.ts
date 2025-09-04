@@ -2,7 +2,6 @@ import express, { type Request, type Response } from "express"
 import { JwtAuth } from "../lib/utils/authHelpers.js"
 import prisma from "../prisma.js"
 import {
-  ProoveCreatePayload,
   ProoveCreateResponse,
   ProoveDeletePayload,
   ProoveDeleteResponse,
