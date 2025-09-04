@@ -1,5 +1,6 @@
 import { ReasonEnum } from "../domain/models/ReasonEnum.js"
 import { StatusEnum } from "../domain/models/StatusEnum.js"
+import { HttpError } from "../lib/error/Error.js"
 import prisma from "../prisma.js"
 import { RejectRolePayload } from "../routes/interfaces/users.js"
 import {
@@ -112,7 +113,7 @@ export async function getConcreteUserService({
     },
   })
 
-  if (!user) throw new Error("пользователь не найден")
+  if (!user) throw new HttpError("пользователь не найден", 404)
 
   return {
     id: user.id,
@@ -135,7 +136,7 @@ export async function deleteUserService({ userId }: DeleteUserServicePayload): P
     where: { id: userId },
   })
 
-  if (!user) throw new Error("Пользователь не найден")
+  if (!user) throw new HttpError("Пользователь не найден", 404)
 
   try {
     const result = await prisma.ticket.findMany({
@@ -164,7 +165,7 @@ export async function deleteUserService({ userId }: DeleteUserServicePayload): P
       message: `Пользователь ${user.name} успешно удален`,
     }
   } catch (error) {
-    throw new Error("Не удалось удалить пользователя, у него есть связанные заявки")
+    throw new HttpError("Не удалось удалить пользователя, у него есть связанные заявки", 409)
   }
 }
 
@@ -173,8 +174,8 @@ export async function grantRoleService({ id, role }: GrantRoleServicePayload): P
     where: { id },
   })
 
-  if (!user) throw new Error("пользователь не найден")
-  if (user.role.includes(role)) throw new Error("Роль уже назначена")
+  if (!user) throw new HttpError("пользователь не найден", 404)
+  if (user.role.includes(role)) throw new HttpError("Роль уже назначена", 409)
 
   const updatedUser = await prisma.user.update({
     where: { id },
@@ -194,8 +195,8 @@ export async function rejectRoleService({ id, role }: RejectRoleServicePayload):
     where: { id },
   })
 
-  if (!user) throw new Error("пользователь не найден")
-  if (!user.role.includes(role)) throw new Error("Роль не найдена")
+  if (!user) throw new HttpError("пользователь не найден", 404)
+  if (!user.role.includes(role)) throw new HttpError("Роль не найдена", 409)
 
   const updatedUser = await prisma.user.update({
     where: { id },
@@ -228,7 +229,7 @@ export async function meInfoService({ id }: MeInfoServicePayload): Promise<MeInf
     },
   })
 
-  if (!user) throw new Error("User not found")
+  if (!user) throw new HttpError("Пользователь не найден", 404)
 
   return {
     ...user,

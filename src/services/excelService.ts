@@ -1,4 +1,5 @@
 import { StatusEnum } from "../domain/models/StatusEnum.js"
+import { HttpError } from "../lib/error/Error.js"
 import { createTable } from "../lib/utils/createTable.js"
 import prisma from "../prisma.js"
 import { ExcelServiceExportPayload, ExcelServiceExportResponse } from "./interfaces/excel.js"
@@ -33,7 +34,7 @@ export async function excelService({
   })
 
   if (tickets.length === 0) {
-    throw new Error("Заявок удовлетворяющих критериям не найдено")
+    throw new HttpError("Заявок удовлетворяющих критериям не найдено", 404)
   }
 
   const columns = [

@@ -12,6 +12,7 @@ import {
   RegisterResponse,
 } from "./interfaces/auth.js"
 import { loginService, refreshService, registerService } from "../services/authService.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 
@@ -24,10 +25,12 @@ router.post(
       setAuthCookies(res, tokens)
       res.status(201).json(tokens)
     } catch (error) {
-      console.error("Error registering user:", error)
-      return res
-        .status(500)
-        .json({ error: error instanceof Error ? error.message : "Ошибка регистрации, попробуйте снова позже" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -39,10 +42,12 @@ router.post("/login", async (req: Request<{}, {}, LoginPayload>, res: Response<L
     setAuthCookies(res, tokens)
     res.status(200).json(tokens)
   } catch (error) {
-    console.error("Error logging in:", error)
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Ошибка авторизации, попробуйте снова позже" })
+    const errorMessage =
+      error instanceof HttpError
+        ? { message: error.message, status: error.statusCode }
+        : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+    console.error("Error logging out:", error)
+    return res.status(errorMessage.status).json({ error: errorMessage.message })
   }
 })
 
@@ -63,10 +68,12 @@ router.post(
       setAuthCookies(res, tokens)
       res.status(200).json(tokens)
     } catch (error) {
-      console.error("Error refreshing token:", error)
-      return res
-        .status(500)
-        .json({ error: error instanceof Error ? error.message : "Ошибка авторизации, попробуйте снова позже" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -78,8 +85,12 @@ router.post("/logout", JwtAuth, async (req: Request, res: Response) => {
     res.clearCookie("refreshToken", { path: "/" })
     res.json({ message: "Logged out successfully" })
   } catch (error) {
+    const errorMessage =
+      error instanceof HttpError
+        ? { message: error.message, status: error.statusCode }
+        : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
     console.error("Error logging out:", error)
-    return res.status(500).json({ error: "Internal server error" })
+    return res.status(errorMessage.status).json({ error: errorMessage.message })
   }
 })
 

@@ -20,7 +20,7 @@ export async function getGroupsService({
   })
 
   return {
-    groups: groups,
+    groups: groups ?? [],
     total: groups.length,
   }
 }

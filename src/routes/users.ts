@@ -21,6 +21,7 @@ import {
   meInfoService,
   rejectRoleService,
 } from "../services/usersService.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 router.use(JwtAuth)
@@ -33,8 +34,12 @@ router.get(
       const result = await getUsersService({ ...req.query })
       res.status(200).json(result)
     } catch (error) {
-      console.error("Error fetching users:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -47,8 +52,12 @@ router.get(
       const result = await getUsersNameService({})
       res.status(200).json(result)
     } catch (error) {
-      console.error("Error fetching users:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -64,8 +73,12 @@ router.get(
 
       res.status(200).json(result)
     } catch (error) {
-      console.error("Error fetching user:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -76,8 +89,12 @@ router.delete("/:id", isAdmin, async (req: Request, res: Response) => {
 
     res.status(204).end(result)
   } catch (error) {
-    console.error("Error deleting user:", error)
-    return res.status(500).json({ error: "Internal server error" })
+    const errorMessage =
+      error instanceof HttpError
+        ? { message: error.message, status: error.statusCode }
+        : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+    console.error("Error logging out:", error)
+    return res.status(errorMessage.status).json({ error: errorMessage.message })
   }
 })
 
@@ -97,8 +114,12 @@ router.patch(
 
       res.status(204).json(result)
     } catch (error) {
-      console.error("Error granting role:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -117,8 +138,12 @@ router.patch(
 
       res.status(204).json(result)
     } catch (error) {
-      console.error("Error granting role:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -137,8 +162,12 @@ router.get("/me/info", async (req: Request, res: Response) => {
 
     res.status(200).json(result)
   } catch (error) {
-    console.error("Error getting current user:", error)
-    return res.status(500).json({ error: "Internal server error" })
+    const errorMessage =
+      error instanceof HttpError
+        ? { message: error.message, status: error.statusCode }
+        : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+    console.error("Error logging out:", error)
+    return res.status(errorMessage.status).json({ error: errorMessage.message })
   }
 })
 

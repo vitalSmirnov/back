@@ -1,3 +1,4 @@
+import { HttpError } from "../lib/error/Error.js"
 import prisma from "../prisma.js"
 import { GetCourseServicePayload, GetCourseServiceResponse } from "./interfaces/course.js"
 
@@ -17,7 +18,7 @@ export async function getCoursesService({
   })
 
   if (!courses) {
-    throw new Error("Курс по данному идентификатору не найден")
+    throw new HttpError("Курс по данному идентификатору не найден", 404)
   }
 
   return {

@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express"
 import { GetCourseResponse, GetCoursesPayload } from "./interfaces/course.js"
 import { getCoursesService } from "../services/courseService.js"
 import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 
@@ -17,9 +18,12 @@ router.get(
 
       return res.status(200).json(proove)
     } catch (error) {
-      const errorMessage = (error as Error).message || "Internal server error"
-      console.error("Error fetching proove:", error)
-      return res.status(500).json({ error: errorMessage || "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )

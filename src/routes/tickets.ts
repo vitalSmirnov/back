@@ -1,16 +1,8 @@
 import express, { type Request, type Response } from "express"
-import { isAdmin, isUser } from "../middlewares/authMiddleware.js"
+import { isAdmin } from "../middlewares/authMiddleware.js"
 import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
-import {
-  ChangeTicketStatusPayload,
-  CreateTicketInfoPayload,
-  CreateTicketInfoResponse,
-  UpdateTicketInfoPayload,
-  UpdateTicketInfoResponse,
-} from "../domain/dto/Tickets/Tickets.js"
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import prisma from "../prisma.js"
+import { CreateTicketInfoPayload, CreateTicketInfoResponse } from "../domain/dto/Tickets/Tickets.js"
+
 import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
 import { JwtAuth } from "../lib/utils/authHelpers.js"
 import {
@@ -30,22 +22,10 @@ import {
   UpdateTicketPayload,
   UpdateTicketResponse,
 } from "./interfaces/tickets.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 router.use(JwtAuth)
-
-// helper to normalize prove path/file binary into a safe string for JSON responses
-const encodeProvePath = (p: any): string => {
-  // p may be { path: Buffer|Uint8Array|string } or { file: { res: Buffer|Uint8Array } }
-  if (!p) return ""
-  const val = p.path ?? p.file?.res ?? p.file?.path
-  if (!val) return ""
-  // Buffer or Uint8Array -> base64, otherwise stringify
-  if (typeof Buffer !== "undefined" && (Buffer.isBuffer(val) || val instanceof Uint8Array)) {
-    return Buffer.from(val).toString("base64")
-  }
-  return String(val)
-}
 
 // get tickets list endpoint
 router.get(
@@ -56,8 +36,12 @@ router.get(
       const result = await getTicketListService({ ...req.query, roles: decoded?.role || [], userId: decoded?.id! })
       return res.status(200).json(result)
     } catch (error) {
-      console.error("Error fetching tickets:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -69,8 +53,12 @@ router.get("/:id", async (req: Request<{ id: string }>, res: Response<GetTicketI
     const ticket = await getTicketIdService({ id: req.params.id, roles: decoded?.role || [], userId: decoded?.id! })
     return res.status(200).json(ticket)
   } catch (error) {
-    console.error("Error fetching ticket:", error)
-    return res.status(500).json({ error: "Internal server error" })
+    const errorMessage =
+      error instanceof HttpError
+        ? { message: error.message, status: error.statusCode }
+        : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+    console.error("Error logging out:", error)
+    return res.status(errorMessage.status).json({ error: errorMessage.message })
   }
 })
 
@@ -86,8 +74,12 @@ router.post(
       const response = await createTicketService({ ...req.body, userId: decoded?.id! })
       res.status(201).json(response)
     } catch (error) {
-      console.error("Error creating ticket:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -110,8 +102,12 @@ router.put(
       })
       return res.status(200).json(response)
     } catch (error) {
-      console.error("Error updating ticket:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -136,8 +132,12 @@ router.patch(
       const ticket = await changeStatusTicketService({ id: req.params.id, status })
       return res.status(200).json(ticket)
     } catch (error) {
-      console.error("Error updating ticket status:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )

@@ -1,8 +1,9 @@
+import { HttpError } from "../lib/error/Error.js"
 import { getFileInfo } from "../lib/utils/fileUtils.js"
 import { FileUploadServicePayload, FileUploadServiceResponse } from "./interfaces/uploadFiles.js"
 
 export async function uploadFilesService({ file }: FileUploadServicePayload): Promise<FileUploadServiceResponse> {
-  if (!file) throw new Error("Файл не был загружен")
+  if (!file) throw new HttpError("Файл не был загружен", 400)
 
   const fileInfo = getFileInfo(file)
 

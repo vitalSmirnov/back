@@ -9,6 +9,7 @@ import {
   RegisterServiceResponse,
 } from "./interfaces/auth.js"
 import { createTokens } from "../lib/utils/authHelpers.js"
+import { HttpError } from "../lib/error/Error.js"
 
 export async function registerService({
   login,
@@ -22,7 +23,7 @@ export async function registerService({
   })
 
   if (existingUser) {
-    throw new Error("Логин уже используется")
+    throw new HttpError("Логин уже используется", 401)
   }
 
   const user = await prisma.user.create({
@@ -60,9 +61,9 @@ export async function loginService({ login, password }: LoginServicePayload): Pr
     },
   })
 
-  if (!user) throw new Error("Пользователь с таким логином не существует")
+  if (!user) throw new HttpError("Пользователь с таким логином не существует", 401)
 
-  if (password !== user.password) throw new Error("Неправильный пароль или логин")
+  if (password !== user.password) throw new HttpError("Неправильный пароль или логин", 401)
 
   const tokens = createTokens(user)
 
@@ -78,7 +79,7 @@ export async function refreshService({ id }: RefreshServicePayload): Promise<Ref
   })
 
   if (!user) {
-    throw new Error("Пользователь не найден")
+    throw new HttpError("Пользователь не найден", 404)
   }
 
   const tokens = createTokens(user)

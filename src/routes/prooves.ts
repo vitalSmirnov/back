@@ -7,6 +7,7 @@ import {
   ProoveDeleteResponse,
   ProoveUpdatePayload,
 } from "../domain/dto/Prooves/index.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 router.use(JwtAuth)
@@ -27,8 +28,12 @@ router.put(
 
       return res.status(200).json(proove)
     } catch (error) {
-      console.error("Error fetching proove:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
@@ -45,8 +50,12 @@ router.delete(
 
       return res.status(204).end()
     } catch (error) {
-      console.error("Error deleting proove:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )

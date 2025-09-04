@@ -1,10 +1,8 @@
-import { UserRole } from "@prisma/client"
-import { GetTicketResponse, GetTicketsPayload, GetTicketsResponse } from "../domain/dto/Tickets/Tickets.js"
+import { GetTicketsPayload } from "../domain/dto/Tickets/Tickets.js"
 import { ReasonEnum } from "../domain/models/ReasonEnum.js"
 import { StatusEnum } from "../domain/models/StatusEnum.js"
 import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
 import prisma from "../prisma.js"
-import { Ticket } from "../domain/models/ticket.js"
 import {
   ChangeStatusTicketServicePayload,
   ChangeStatusTicketServiceResponse,
@@ -17,18 +15,7 @@ import {
   UpdateTicketServicePayload,
   UpdateTicketServiceResponse,
 } from "./interfaces/tickets.js"
-
-const encodeProvePath = (p: any): string => {
-  // p may be { path: Buffer|Uint8Array|string } or { file: { res: Buffer|Uint8Array } }
-  if (!p) return ""
-  const val = p.path ?? p.file?.res ?? p.file?.path
-  if (!val) return ""
-  // Buffer or Uint8Array -> base64, otherwise stringify
-  if (typeof Buffer !== "undefined" && (Buffer.isBuffer(val) || val instanceof Uint8Array)) {
-    return Buffer.from(val).toString("base64")
-  }
-  return String(val)
-}
+import { HttpError } from "../lib/error/Error.js"
 
 async function createTicketsInDb({
   name,
@@ -191,9 +178,9 @@ export async function getTicketIdService({
 }: GetTicketIdServicePayload): Promise<GetTicketIdServiceResponse> {
   const ticket = await getTicketIdFromDb(id)
 
-  if (!ticket) throw new Error("Заявка не найдена")
+  if (!ticket) throw new HttpError("Заявка не найдена", 404)
 
-  if (!roles.includes(UserRoleEnum.ADMIN) && ticket.user.id !== userId) throw new Error("Доступ запрещен")
+  if (!roles.includes(UserRoleEnum.ADMIN) && ticket.user.id !== userId) throw new HttpError("Доступ запрещен", 403)
 
   return {
     ...ticket,
@@ -225,11 +212,11 @@ export async function updateTicketService({
     where: { id },
   })
 
-  if (!ticket) throw new Error("Заявка не найдена")
-  if (ticket.status !== StatusEnum.PENDING) throw new Error("В этом состоянии редактирование недоступно")
+  if (!ticket) throw new HttpError("Заявка не найдена", 404)
+  if (ticket.status !== StatusEnum.PENDING) throw new HttpError("В этом состоянии редактирование недоступно", 409)
 
   if (!roles.includes(UserRoleEnum.ADMIN) && ticket.userId !== userId)
-    throw new Error("Отсутствуют права для редактирования заявки")
+    throw new HttpError("Отсутствуют права для редактирования заявки", 403)
 
   const updateData: any = {
     name: name,
@@ -289,7 +276,7 @@ export async function changeStatusTicketService({
     where: { id, NOT: { status: status } },
   })
 
-  if (!ticket) throw new Error("Ticket not found")
+  if (!ticket) throw new HttpError("Заявка не найдена", 404)
 
   const updatedTicket = await prisma.ticket.update({
     where: { id },

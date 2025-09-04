@@ -4,6 +4,7 @@ import { JwtAuth } from "../lib/utils/authHelpers.js"
 import { setResponseExcelHeaders } from "../middlewares/excelMiddleware.js"
 import { ExcelExportPayload } from "./interfaces/excel.js"
 import { excelService } from "../services/excelService.js"
+import { HttpError } from "../lib/error/Error.js"
 
 const router = express.Router()
 
@@ -25,8 +26,12 @@ router.get(
       res.setHeader("Content-Length", buffer.byteLength.toString())
       res.status(200).send(buffer)
     } catch (error) {
-      console.error("Error exporting tickets XLS:", error)
-      return res.status(500).json({ error: "Internal server error" })
+      const errorMessage =
+        error instanceof HttpError
+          ? { message: error.message, status: error.statusCode }
+          : { message: "Что-то пошло не так, попробуйте позже", status: 500 }
+      console.error("Error logging out:", error)
+      return res.status(errorMessage.status).json({ error: errorMessage.message })
     }
   }
 )
