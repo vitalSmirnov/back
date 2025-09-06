@@ -35,13 +35,13 @@ export interface GrantRoleServicePayload {
   id: string
   role: UserRole
 }
-export interface GrantRoleServiceResponse extends Omit<UserResponse, "tickets"> {}
+export interface GrantRoleServiceResponse extends UserResponse {}
 
 export interface RejectRoleServicePayload {
   id: string
   role: UserRole
 }
-export interface RejectRoleServiceResponse extends Omit<UserResponse, "tickets"> {}
+export interface RejectRoleServiceResponse extends UserResponse {}
 
 export interface MeInfoServicePayload {
   id: string

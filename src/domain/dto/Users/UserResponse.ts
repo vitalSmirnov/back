@@ -34,7 +34,7 @@ export interface UserListResponse extends WithTotal {
 export interface UserChangeRolePayload {
   role: UserRole
 }
-export interface UserChangeRoleResponse extends Omit<UserResponse, "tickets"> {}
+export interface UserChangeRoleResponse extends UserResponse {}
 
 export interface UserSuggestPaload {}
 export interface UserSuggestResponse {

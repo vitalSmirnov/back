@@ -2,7 +2,6 @@ import { ReasonEnum } from "../domain/models/ReasonEnum.js"
 import { StatusEnum } from "../domain/models/StatusEnum.js"
 import { HttpError } from "../lib/error/Error.js"
 import prisma from "../prisma.js"
-import { RejectRolePayload } from "../routes/interfaces/users.js"
 import {
   DeleteUserServicePayload,
   DeleteUserServiceResponse,
@@ -36,13 +35,13 @@ export async function getUsersService({
       role: roleFilter,
       course: {
         id: {
-          contains: course,
+          contains: course ?? "",
           mode: "insensitive",
         },
       },
       group: {
         id: {
-          contains: group,
+          contains: group ?? "",
           mode: "insensitive",
         },
       },
@@ -180,13 +179,26 @@ export async function grantRoleService({ id, role }: GrantRoleServicePayload): P
   const updatedUser = await prisma.user.update({
     where: { id },
     data: { role: [...user.role, role] },
-    include: { course: true, group: true },
+    include: {
+      course: {
+        select: { id: true, identifier: true, name: true },
+      },
+      group: {
+        select: { id: true, identifier: true },
+      },
+      tickets: { include: { prooves: true } },
+    },
   })
 
   return {
     ...updatedUser,
-    course: updatedUser.course ?? undefined,
     group: updatedUser.group ?? undefined,
+    course: updatedUser.course ?? undefined,
+    tickets: updatedUser.tickets.map(ticket => ({
+      ...ticket,
+      reason: ticket.reason as ReasonEnum,
+      status: ticket.status as StatusEnum,
+    })),
   }
 }
 
@@ -201,13 +213,26 @@ export async function rejectRoleService({ id, role }: RejectRoleServicePayload):
   const updatedUser = await prisma.user.update({
     where: { id },
     data: { role: [...user.role.filter(i => i !== role)] },
-    include: { course: true, group: true },
+    include: {
+      course: {
+        select: { id: true, identifier: true, name: true },
+      },
+      group: {
+        select: { id: true, identifier: true },
+      },
+      tickets: { include: { prooves: true } },
+    },
   })
 
   return {
     ...updatedUser,
-    course: updatedUser.course ?? undefined,
     group: updatedUser.group ?? undefined,
+    course: updatedUser.course ?? undefined,
+    tickets: updatedUser.tickets.map(ticket => ({
+      ...ticket,
+      reason: ticket.reason as ReasonEnum,
+      status: ticket.status as StatusEnum,
+    })),
   }
 }
 

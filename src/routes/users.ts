@@ -112,7 +112,7 @@ router.patch(
 
       const result = await grantRoleService({ id, role })
 
-      res.status(204).json(result)
+      res.status(201).json(result)
     } catch (error) {
       const errorMessage =
         error instanceof HttpError
@@ -136,7 +136,7 @@ router.patch(
 
       const result = await rejectRoleService({ id, role })
 
-      res.status(204).json(result)
+      res.status(201).json(result)
     } catch (error) {
       const errorMessage =
         error instanceof HttpError

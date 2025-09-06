@@ -1,37 +1,31 @@
-import { UserRole } from "@prisma/client"
 import prisma from "../src/prisma.js"
 import { fileURLToPath } from "url"
+import { Admins, Courses, Groups } from "./initialSchemas.js"
 
 export async function main() {
   // helper: deterministic-ish password hash (salt:hash)
 
   // 1) Create admin user (idempotent / tolerant)
-  const adminEmail = "admin@example.com"
-  const passwordHash = "admin"
-  const adminName = "Admin"
 
   // Try several common field shapes to match different user schemas
   async function upsertAdmin() {
     // candidate create payloads in order of preference
-    const candidates = [{ email: adminEmail, name: adminName, role: [UserRole.ADMIN], password: passwordHash }]
+    const admins = Admins
 
-    for (const createPayload of candidates) {
+    for (const admin of admins) {
       try {
         // use any typings to avoid compile-time model assumptions
         // 'where' uses unique email
         // update will set role/name when available
-        const updatePayload = {}
-        if ("role" in createPayload) updatePayload.role = createPayload.role
-        if ("name" in createPayload) updatePayload.name = createPayload.name
 
         await prisma.user.upsert({
-          where: { email: adminEmail },
-          update: updatePayload,
-          create: createPayload,
+          where: { email: admin.email },
+          update: admin,
+          create: admin,
         })
-        console.log("Admin upsert succeeded with payload keys:", Object.keys(createPayload).join(", "))
         return
       } catch (err) {
+        console.error("Admin upsert attempt failed with payload keys:", admin)
         // try next candidate if model shape mismatch
         // keep errors quiet for each attempt, but log last error if all fail
         // (no rethrow here)
@@ -49,38 +43,38 @@ export async function main() {
   }
 
   // 2) Create 6 courses (idempotent)
-  const coursesPayload = Array.from({ length: 6 }, (_, i) => ({
-    name: `Course ${i + 1}`,
-    identifier: i + 1,
-  }))
+  const coursesSeed = Courses
 
-  for (const c of coursesPayload) {
+  for (const course of coursesSeed) {
     await prisma.course.upsert({
-      where: { identifier: c.identifier },
-      update: { identifier: c.identifier, name: c.name },
-      create: c,
+      where: { identifier: course.identifier },
+      update: { name: course.name },
+      create: course,
     })
   }
 
-  // fetch courses to get their DB ids
-  const courses = await prisma.course.findMany({
-    where: { identifier: { in: coursesPayload.map(c => c.identifier) } },
+  const createdCourses = await prisma.course.findMany({
+    where: { identifier: { in: courseIdentifiers } },
   })
 
-  // 3) For each course create 2-3 groups (idempotent)
-  for (const course of courses) {
-    // random 2-3 groups per course
-    const count = 2 + Math.floor(Math.random() * 2) // 2 or 3
-    const groupsPayload = Array.from({ length: count }, (_, j) => ({
-      identifier: `Group ${j + 1} - ${course.name}`,
-      courseId: course.id,
-    }))
+  const groupsSeed = Groups
 
-    for (const g of groupsPayload) {
+  // 3) For each course create 2-3 groups (idempotent)
+  for (const course of createdCourses) {
+    for (const group of groupsSeed) {
+      if (group.courseIdentifier !== course.identifier) continue
       await prisma.group.upsert({
-        where: { identifier: g.identifier },
-        update: { identifier: g.identifier, courseId: g.courseId },
-        create: g,
+        where: { identifier: group.identifier },
+        update: {
+          id: group.id,
+          courseId: course.id,
+          identifier: group.identifier,
+        },
+        create: {
+          id: group.id,
+          courseId: course.id,
+          identifier: group.identifier,
+        },
       })
     }
   }

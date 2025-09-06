@@ -6,7 +6,7 @@ import cookieParser from "cookie-parser"
 import cors from "cors"
 
 const app = express()
-const PORT = process.env.PORT || 8000
+const PORT = parseInt(process.env.PORT || "8000")
 app.use(cookieParser())
 app.use(
   cors({
@@ -37,6 +37,6 @@ app.use(
   routes
 )
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", 0, () => {
   console.log(`Server running on port ${PORT}`)
 })
