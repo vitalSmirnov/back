@@ -27,8 +27,8 @@ This is a simple Node.js API server using Express.
    npm start
    ```
 
-The server will run on [http://localhost:3000/api](http://localhost:3000/api) by default.
+The server will run on [http://localhost:8000/api](http://localhost:8000/api) by default.
 
 ## Health Check
 
-Visit [http://localhost:3000/health](http://localhost:3000/health) to check if the server is running.
+Visit [http://localhost:8000/health](http://localhost:8000/health) to check if the server is running.
