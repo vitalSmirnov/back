@@ -47,9 +47,10 @@ router.get(
 router.get(
   "/existing",
   isNotStudent,
-  async (req: Request<{}, {}, GetUsersNamesPayload>, res: Response<GetUsersNamesResponse | ErrorResponse>) => {
+  async (req: Request<{}, {}, {}, GetUsersNamesPayload>, res: Response<GetUsersNamesResponse | ErrorResponse>) => {
+    const { userName } = req.query
     try {
-      const result = await getUsersNameService({})
+      const result = await getUsersNameService({ name: userName })
       res.status(200).json(result)
     } catch (error) {
       const errorMessage =

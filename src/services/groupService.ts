@@ -1,4 +1,4 @@
-import prisma from "../prisma.js"
+import { getGroupsRepository } from "../repository/groupRepotitory.js"
 import { GetGroupsServicePayload, GetGroupsServiceResponse } from "./interfaces/group.js"
 
 export async function getGroupsService({
@@ -7,20 +7,7 @@ export async function getGroupsService({
   offset = "0",
   limit = "100",
 }: GetGroupsServicePayload): Promise<GetGroupsServiceResponse> {
-  const groups = await prisma.group.findMany({
-    where: { identifier: identifier, courseId: courseId },
-    select: {
-      id: true,
-      identifier: true,
-      courseId: true,
-    },
+  const groups = await getGroupsRepository({ identifier, courseId, limit, offset })
 
-    skip: parseInt(offset),
-    take: parseInt(limit),
-  })
-
-  return {
-    groups: groups ?? [],
-    total: groups.length,
-  }
+  return groups
 }

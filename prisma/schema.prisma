@@ -16,7 +16,6 @@ model User {
   courseId String?
   groupId  String?
   tickets  Ticket[]
-  course   Course?    @relation(fields: [courseId], references: [id])
   group    Group?     @relation(fields: [groupId], references: [id])
 }
 
@@ -33,7 +32,6 @@ model Course {
   name       String
   identifier Int     @unique
   groups     Group[]
-  users      User[]
 }
 
 model Ticket {

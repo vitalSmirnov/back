@@ -1,4 +1,3 @@
-import { Prove } from "../../models/prove.js"
 import { ReasonEnum } from "../../models/ReasonEnum.js"
 import { StatusEnum } from "../../models/StatusEnum.js"
 import { Ticket } from "../../models/ticket.js"
@@ -12,8 +11,8 @@ interface TicketLessUser extends Ticket {
 
 export interface GetTicketsPayload extends Pagination {
   userName?: string
-  startDate?: Date
-  endDate?: Date
+  startDate?: string
+  endDate?: string
   group?: string
   reason?: ReasonEnum
   status?: StatusEnum
@@ -30,7 +29,7 @@ export interface ChangeTicketStatusPayload {
 export interface ChangeTicketStatusResponse {}
 
 export interface UpdateTicketInfoPayload {
-  endDate?: Date
+  endDate?: string
   name?: string
   reason?: ReasonEnum
   prooves?: string[]
@@ -39,8 +38,8 @@ export interface UpdateTicketInfoPayload {
 export interface UpdateTicketInfoResponse extends Ticket {}
 
 export interface CreateTicketInfoPayload {
-  endDate: Date
-  startDate: Date
+  endDate: string
+  startDate: string
   name?: string
   reason?: ReasonEnum
   prooves: string[]

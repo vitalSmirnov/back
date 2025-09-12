@@ -1,9 +1,9 @@
 import { StatusEnum } from "../domain/models/StatusEnum.js"
 import { HttpError } from "../lib/error/Error.js"
 import { createTable } from "../lib/utils/createTable.js"
-import prisma from "../prisma.js"
 import { ExcelServiceExportPayload, ExcelServiceExportResponse } from "./interfaces/excel.js"
 import { Buffer } from "buffer"
+import { excelRepository } from "../repository/excelRepository.js"
 
 export async function excelService({
   endDate,
@@ -11,26 +11,11 @@ export async function excelService({
   courseId,
   groupId,
 }: ExcelServiceExportPayload): Promise<ExcelServiceExportResponse> {
-  const tickets = await prisma.ticket.findMany({
-    where: {
-      endDate: { lte: endDate },
-      status: StatusEnum.APPROVED,
-      startDate: { gte: startDate },
-      user: {
-        ...(courseId ? { courseId } : {}),
-        ...(groupId ? { groupId } : {}),
-      },
-    },
-    include: {
-      user: {
-        include: {
-          course: { select: { id: true, identifier: true, name: true } },
-          group: { select: { id: true, identifier: true } },
-        },
-      },
-      prooves: true,
-    },
-    orderBy: { startDate: "desc" },
+  const { tickets } = await excelRepository({
+    endDate,
+    startDate,
+    courseId,
+    groupId,
   })
 
   if (tickets.length === 0) {
@@ -51,7 +36,7 @@ export async function excelService({
   const tableResult = await createTable(columns, tickets as any)
 
   const fileNameParts = ["tickets"]
-  if (courseId) fileNameParts.push(`курс-${tickets[0].user.course?.identifier || courseId}`)
+  if (courseId) fileNameParts.push(`курс-${tickets[0].user.group?.course?.identifier || courseId}`)
   if (groupId) fileNameParts.push(`группа-${tickets[0].user.group?.identifier || groupId}`)
   const fileName = fileNameParts.join("_") + ".xlsx"
 

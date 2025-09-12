@@ -13,7 +13,9 @@ export interface GetUsersResponse {
   total: number
 }
 
-export interface GetUsersNamesPayload extends Pagination {}
+export interface GetUsersNamesPayload extends Pagination {
+  userName?: string
+}
 export interface GetUsersNamesResponse {
   users: Pick<User, "id" | "name">[]
   total: number

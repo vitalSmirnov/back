@@ -1,5 +1,4 @@
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
+import { getCoursesRepository } from "../repository/courseRepository.js"
 import { GetCourseServicePayload, GetCourseServiceResponse } from "./interfaces/course.js"
 
 export async function getCoursesService({
@@ -7,22 +6,7 @@ export async function getCoursesService({
   limit = "100",
   offset = "0",
 }: GetCourseServicePayload): Promise<GetCourseServiceResponse> {
-  const courses = await prisma.course.findMany({
-    where: { identifier: identifier },
-    select: {
-      id: true,
-      identifier: true,
-    },
-    skip: parseInt(offset),
-    take: parseInt(limit),
-  })
+  const courses = await getCoursesRepository({ identifier, limit, offset })
 
-  if (!courses) {
-    throw new HttpError("Курс по данному идентификатору не найден", 404)
-  }
-
-  return {
-    courses: courses,
-    total: courses.length,
-  }
+  return courses
 }

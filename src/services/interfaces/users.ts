@@ -13,7 +13,9 @@ export interface GetUsersServiceResponse {
   total: number
 }
 
-export interface GetUserNamesServicePayload {}
+export interface GetUserNamesServicePayload {
+  name?: string
+}
 export interface GetUserNamesServiceResponse {
   users: Pick<User, "id" | "name">[]
   total: number
