@@ -1,5 +1,5 @@
-import { Course } from "./course.js"
-import { User } from "./user.js"
+import { Course } from "./course"
+import { User } from "./user"
 
 export interface Group {
   id: string

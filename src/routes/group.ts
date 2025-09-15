@@ -1,8 +1,8 @@
 import express, { type Request, type Response } from "express"
-import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
-import { GetGroupsPayload, GetGroupsResponse } from "./interfaces/group.js"
-import { getGroupsService } from "../services/groupService.js"
-import { HttpError } from "../lib/error/Error.js"
+import { ErrorResponse } from "../domain/dto/ErrorResponse"
+import { GetGroupsPayload, GetGroupsResponse } from "./interfaces/group"
+import { getGroupsService } from "../services/groupService"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 

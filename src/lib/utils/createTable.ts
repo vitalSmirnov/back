@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs"
-import { UserRoleEnum } from "../../domain/models/UserRoleEnum.js"
-import { ReasonEnum } from "../../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../../domain/models/StatusEnum.js"
+import { UserRoleEnum } from "../../domain/models/UserRoleEnum"
+import { ReasonEnum } from "../../domain/models/ReasonEnum"
+import { StatusEnum } from "../../domain/models/StatusEnum"
 
 interface TableColumn {
   header: string

@@ -1,17 +1,17 @@
 import express, { type Request, type Response } from "express"
-import { isAdmin, isNotStudent } from "../middlewares/authMiddleware.js"
-import { JwtAuth } from "../lib/utils/authHelpers.js"
-import { UserChangeRolePayload, UserChangeRoleResponse } from "../domain/dto/Users/UserResponse.js"
+import { isAdmin, isNotStudent } from "../middlewares/authMiddleware"
+import { JwtAuth } from "../lib/utils/authHelpers"
+import { UserChangeRolePayload, UserChangeRoleResponse } from "../domain/dto/Users/UserResponse"
 
-import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
+import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader"
 import {
   GetConcreteUserResponse,
   GetUsersNamesPayload,
   GetUsersNamesResponse,
   GetUsersPayload,
   GetUsersResponse,
-} from "./interfaces/users.js"
-import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
+} from "./interfaces/users"
+import { ErrorResponse } from "../domain/dto/ErrorResponse"
 import {
   deleteUserService,
   getConcreteUserService,
@@ -20,8 +20,8 @@ import {
   grantRoleService,
   meInfoService,
   rejectRoleService,
-} from "../services/usersService.js"
-import { HttpError } from "../lib/error/Error.js"
+} from "../services/usersService"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 router.use(JwtAuth)

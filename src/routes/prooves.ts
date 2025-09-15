@@ -1,13 +1,13 @@
 import express, { type Request, type Response } from "express"
-import { JwtAuth } from "../lib/utils/authHelpers.js"
-import prisma from "../prisma.js"
+import { JwtAuth } from "../lib/utils/authHelpers"
+import prisma from "../prisma"
 import {
   ProoveCreateResponse,
   ProoveDeletePayload,
   ProoveDeleteResponse,
   ProoveUpdatePayload,
-} from "../domain/dto/Prooves/index.js"
-import { HttpError } from "../lib/error/Error.js"
+} from "../domain/dto/Prooves/index"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 router.use(JwtAuth)

@@ -1,9 +1,8 @@
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { HttpError } from "../lib/error/Error.js"
-import { createTable } from "../lib/utils/createTable.js"
-import { ExcelServiceExportPayload, ExcelServiceExportResponse } from "./interfaces/excel.js"
+import { HttpError } from "../lib/error/Error"
+import { createTable } from "../lib/utils/createTable"
+import { ExcelServiceExportPayload, ExcelServiceExportResponse } from "./interfaces/excel"
 import { Buffer } from "buffer"
-import { excelRepository } from "../repository/excelRepository.js"
+import { excelRepository } from "../repository/excelRepository"
 
 export async function excelService({
   endDate,

@@ -1,6 +1,6 @@
 import { User, UserRole } from "@prisma/client"
-import { Pagination } from "../../domain/dto/Pagination.js"
-import { UserChangeRolePayload, UserChangeRoleResponse, UserResponse } from "../../domain/dto/Users/UserResponse.js"
+import { Pagination } from "../../domain/dto/Pagination"
+import { UserChangeRolePayload, UserChangeRoleResponse, UserResponse } from "../../domain/dto/Users/UserResponse"
 
 export interface GetUsersPayload extends Pagination {
   userName?: string

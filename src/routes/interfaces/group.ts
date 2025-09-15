@@ -1,5 +1,5 @@
 import { Group } from "@prisma/client"
-import { Pagination } from "../../domain/dto/Pagination.js"
+import { Pagination } from "../../domain/dto/Pagination"
 
 interface GroupFilters {
   identifier?: string

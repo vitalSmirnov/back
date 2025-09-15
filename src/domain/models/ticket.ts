@@ -1,6 +1,6 @@
-import { Prove } from "./prove.js"
-import { ReasonEnum } from "./ReasonEnum.js"
-import { StatusEnum } from "./StatusEnum.js"
+import { Prove } from "./prove"
+import { ReasonEnum } from "./ReasonEnum"
+import { StatusEnum } from "./StatusEnum"
 
 export interface Ticket {
   id: string

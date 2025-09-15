@@ -1,9 +1,9 @@
 import { User } from "@prisma/client"
-import { Ticket } from "../../models/ticket.js"
-import { UserRole } from "../../models/UserRoleEnum.js"
-import { Pagination } from "../Pagination.js"
-import { WithTotal } from "../WithTotalType.js"
-import { Group } from "../../models/group.js"
+import { Ticket } from "../../models/ticket"
+import { UserRole } from "../../models/UserRoleEnum"
+import { Pagination } from "../Pagination"
+import { WithTotal } from "../WithTotalType"
+import { Group } from "../../models/group"
 
 export interface UserPayload {
   userName?: string

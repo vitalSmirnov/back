@@ -1,6 +1,6 @@
-import { FileUploadServicePayload, FileUploadServiceResponse } from "./interfaces/uploadFiles.js"
-import { HttpError } from "../lib/error/Error.js"
-import { getFileInfo } from "../lib/utils/fileUtils.js"
+import { FileUploadServicePayload, FileUploadServiceResponse } from "./interfaces/uploadFiles"
+import { HttpError } from "../lib/error/Error"
+import { getFileInfo } from "../lib/utils/fileUtils"
 
 export async function uploadFilesService({ file }: FileUploadServicePayload): Promise<FileUploadServiceResponse> {
   try {

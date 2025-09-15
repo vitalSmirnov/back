@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client"
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
 import {
   LoginRepositoryPayload,
   LoginRepositoryResponse,
@@ -8,7 +8,7 @@ import {
   RegisterRepositoryResponse,
   RefreshRepositoryPayload,
   RefreshRepositoryResponse,
-} from "./interfaces/auth.js"
+} from "./interfaces/auth"
 
 export async function registerRepository({
   login,

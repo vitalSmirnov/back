@@ -1,5 +1,5 @@
-import { Course } from "../../models/course.js"
-import { Pagination } from "../Pagination.js"
+import { Course } from "../../models/course"
+import { Pagination } from "../Pagination"
 
 interface CourseFilters {
   identifier?: string

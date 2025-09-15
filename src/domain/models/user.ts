@@ -1,6 +1,6 @@
-import { Group } from "./group.js"
-import { Ticket } from "./ticket.js"
-import { UserRole } from "./UserRoleEnum.js"
+import { Group } from "./group"
+import { Ticket } from "./ticket"
+import { UserRole } from "./UserRoleEnum"
 
 export interface User {
   id: string

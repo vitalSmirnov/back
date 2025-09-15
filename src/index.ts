@@ -1,13 +1,13 @@
 "use strict"
 
 import express from "express"
-import routes from "./routes.js"
+import routes from "./routes"
 import cookieParser from "cookie-parser"
 import swaggerUi from "swagger-ui-express"
-import swaggerSpec from "./swagger.js"
+import swaggerSpec from "./swagger"
 import cors from "cors"
 
-const app = express()
+export const app = express()
 const PORT = parseInt(process.env.PORT || "8000")
 app.use(cookieParser())
 app.use(

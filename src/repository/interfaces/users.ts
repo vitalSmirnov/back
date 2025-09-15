@@ -1,8 +1,5 @@
-import { Pagination } from "../../domain/dto/Pagination.js"
-import { User } from "../../domain/models/user.js"
-import { UserRoleEnum } from "../../domain/models/UserRoleEnum.js"
-import { ReasonEnum } from "../../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../../domain/models/StatusEnum.js"
+import { Pagination } from "../../domain/dto/Pagination"
+import { User } from "../../domain/models/user"
 import { UserRole, TicketReason, TicketStatus } from "@prisma/client"
 
 export interface UsersNameRepositoryPayload extends Pagination {
@@ -114,8 +111,8 @@ export interface GrantRoleRepositoryResponse {
     description: string
     startDate: Date
     endDate: Date
-      reason: TicketReason
-      status: TicketStatus
+    reason: TicketReason
+    status: TicketStatus
     userId: string
     prooves: Array<{
       id: string
@@ -150,8 +147,8 @@ export interface RejectRoleRepositoryResponse {
     description: string
     startDate: Date
     endDate: Date
-      reason: TicketReason
-      status: TicketStatus
+    reason: TicketReason
+    status: TicketStatus
     userId: string
     prooves: Array<{
       id: string
@@ -185,8 +182,8 @@ export interface MeInfoRepositoryResponse {
     description: string
     startDate: Date
     endDate: Date
-      reason: TicketReason
-      status: TicketStatus
+    reason: TicketReason
+    status: TicketStatus
     userId: string
     prooves: Array<{
       id: string

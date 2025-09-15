@@ -1,9 +1,9 @@
-import { ReasonEnum } from "../../models/ReasonEnum.js"
-import { StatusEnum } from "../../models/StatusEnum.js"
-import { Ticket } from "../../models/ticket.js"
-import { User } from "../../models/user.js"
-import { Pagination } from "../Pagination.js"
-import { WithTotal } from "../WithTotalType.js"
+import { ReasonEnum } from "../../models/ReasonEnum"
+import { StatusEnum } from "../../models/StatusEnum"
+import { Ticket } from "../../models/ticket"
+import { User } from "../../models/user"
+import { Pagination } from "../Pagination"
+import { WithTotal } from "../WithTotalType"
 
 interface TicketLessUser extends Ticket {
   user: Omit<User, "login">

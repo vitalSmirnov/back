@@ -1,6 +1,6 @@
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
-import { GetGroupsRepositoryPayload, GetGroupsRepositoryResponse } from "./interfaces/group.js"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
+import { GetGroupsRepositoryPayload, GetGroupsRepositoryResponse } from "./interfaces/group"
 
 export async function getGroupsRepository({
   identifier,

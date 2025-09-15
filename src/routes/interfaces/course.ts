@@ -1,5 +1,5 @@
 import { Course } from "@prisma/client"
-import { Pagination } from "../../domain/dto/Pagination.js"
+import { Pagination } from "../../domain/dto/Pagination"
 
 interface CourseFilters {
   identifier?: string

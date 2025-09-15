@@ -9,7 +9,7 @@ import {
   GetTicketsResponse,
   UpdateTicketInfoPayload,
   UpdateTicketInfoResponse,
-} from "../../domain/dto/Tickets/Tickets.js"
+} from "../../domain/dto/Tickets/Tickets"
 
 export interface GetTicketListServicePayload extends GetTicketsPayload {
   roles: UserRole[]

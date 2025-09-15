@@ -1,5 +1,5 @@
-import { LoginCredentials, RegisterCredentials } from "../../domain/dto/Authorization/LoginCredentials.js"
-import { UserRole } from "../../domain/models/UserRoleEnum.js"
+import { LoginCredentials, RegisterCredentials } from "../../domain/dto/Authorization/LoginCredentials"
+import { UserRole } from "../../domain/models/UserRoleEnum"
 
 export interface RegisterRepositoryPayload extends RegisterCredentials {}
 

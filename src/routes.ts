@@ -1,12 +1,12 @@
 import express from "express"
-import authRouter from "./routes/auth.js"
-import usersRouter from "./routes/users.js"
-import ticketsRouter from "./routes/tickets.js"
-import proovesRouter from "./routes/prooves.js"
-import uploadRouter from "./routes/uploadFiles.js"
-import courseRouter from "./routes/course.js"
-import groupRouter from "./routes/group.js"
-import excelRouter from "./routes/excel.js"
+import authRouter from "./routes/auth"
+import usersRouter from "./routes/users"
+import ticketsRouter from "./routes/tickets"
+import proovesRouter from "./routes/prooves"
+import uploadRouter from "./routes/uploadFiles"
+import courseRouter from "./routes/course"
+import groupRouter from "./routes/group"
+import excelRouter from "./routes/excel"
 
 const router = express.Router()
 

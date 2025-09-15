@@ -5,9 +5,9 @@ import {
   RefreshServiceResponse,
   RegisterServicePayload,
   RegisterServiceResponse,
-} from "./interfaces/auth.js"
-import { createTokens } from "../lib/utils/authHelpers.js"
-import { registerRepository, loginRepository, refreshRepository } from "../repository/authRepository.js"
+} from "./interfaces/auth"
+import { createTokens } from "../lib/utils/authHelpers"
+import { registerRepository, loginRepository, refreshRepository } from "../repository/authRepository"
 
 export async function registerService(payload: RegisterServicePayload): Promise<RegisterServiceResponse> {
   const user = await registerRepository(payload)

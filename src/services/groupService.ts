@@ -1,5 +1,5 @@
-import { getGroupsRepository } from "../repository/groupRepotitory.js"
-import { GetGroupsServicePayload, GetGroupsServiceResponse } from "./interfaces/group.js"
+import { getGroupsRepository } from "../repository/groupRepotitory"
+import { GetGroupsServicePayload, GetGroupsServiceResponse } from "./interfaces/group"
 
 export async function getGroupsService({
   identifier,

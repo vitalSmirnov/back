@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client"
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
 import {
   CreateUserRepositoryPayload,
   CreateUserRepositoryResponse,
@@ -20,12 +20,9 @@ import {
   RejectRoleRepositoryResponse,
   MeInfoRepositoryPayload,
   MeInfoRepositoryResponse,
-} from "./interfaces/users.js"
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
-import { User } from "../domain/models/user.js"
-import { DeleteUserResponse, GrantRoleResponse, RejectRoleResponse } from "../routes/interfaces/users.js"
+} from "./interfaces/users"
+import { ReasonEnum } from "../domain/models/ReasonEnum"
+import { StatusEnum } from "../domain/models/StatusEnum"
 
 export async function getUsersNameRepository({
   name,
@@ -170,7 +167,9 @@ export async function getUsersRepository({
   limit = "100",
 }: GetUsersRepositoryPayload): Promise<GetUsersRepositoryResponse> {
   try {
-    const roleFilter: { hasSome: UserRole[] } | undefined = role ? { hasSome: Array.isArray(role) ? role : [role] } : undefined
+    const roleFilter: { hasSome: UserRole[] } | undefined = role
+      ? { hasSome: Array.isArray(role) ? role : [role] }
+      : undefined
 
     const users = await prisma.user.findMany({
       where: {
@@ -231,7 +230,9 @@ export async function getUserByNameRepository({ name }: { name?: string }): Prom
   }
 }
 
-export async function deleteUserRepository({ userId }: DeleteUserRepositoryPayload): Promise<DeleteUserRepositoryResponse> {
+export async function deleteUserRepository({
+  userId,
+}: DeleteUserRepositoryPayload): Promise<DeleteUserRepositoryResponse> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -268,7 +269,10 @@ export async function deleteUserRepository({ userId }: DeleteUserRepositoryPaylo
   }
 }
 
-export async function grantRoleRepository({ id, role }: GrantRoleRepositoryPayload): Promise<GrantRoleRepositoryResponse> {
+export async function grantRoleRepository({
+  id,
+  role,
+}: GrantRoleRepositoryPayload): Promise<GrantRoleRepositoryResponse> {
   try {
     const user = await prisma.user.findUnique({
       where: { id },
@@ -297,7 +301,10 @@ export async function grantRoleRepository({ id, role }: GrantRoleRepositoryPaylo
   }
 }
 
-export async function rejectRoleRepository({ id, role }: RejectRoleRepositoryPayload): Promise<RejectRoleRepositoryResponse> {
+export async function rejectRoleRepository({
+  id,
+  role,
+}: RejectRoleRepositoryPayload): Promise<RejectRoleRepositoryResponse> {
   try {
     const user = await prisma.user.findUnique({
       where: { id },

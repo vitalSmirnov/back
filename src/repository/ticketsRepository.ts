@@ -1,7 +1,6 @@
-import { GetTicketsPayload } from "../domain/dto/Tickets/Tickets.js"
 import { TicketReason, TicketStatus } from "@prisma/client"
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
 import {
   CreateTicketRepositoryPayload,
   CreateTicketRepositoryResponse,
@@ -15,9 +14,9 @@ import {
   UpdateTicketRepositoryResponse,
   ChangeStatusTicketRepositoryPayload,
   ChangeStatusTicketRepositoryResponse,
-} from "./interfaces/tickets.js"
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
+} from "./interfaces/tickets"
+import { ReasonEnum } from "../domain/models/ReasonEnum"
+import { StatusEnum } from "../domain/models/StatusEnum"
 
 export async function createTicketRepository({
   name,

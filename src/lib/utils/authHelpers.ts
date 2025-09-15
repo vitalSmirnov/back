@@ -1,7 +1,7 @@
-import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse.js"
-import { User } from "../../domain/models/user.js"
+import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse"
+import { User } from "../../domain/models/user"
 import jwt from "jsonwebtoken"
-import { UserRole } from "../../domain/models/UserRoleEnum.js"
+import { UserRole } from "../../domain/models/UserRoleEnum"
 import { type Request, type Response, NextFunction } from "express"
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET || "dev_secret"

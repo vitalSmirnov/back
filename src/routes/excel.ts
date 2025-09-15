@@ -1,10 +1,10 @@
 import express, { type Request, type Response } from "express"
-import { isAdmin } from "../middlewares/authMiddleware.js"
-import { JwtAuth } from "../lib/utils/authHelpers.js"
-import { setResponseExcelHeaders } from "../middlewares/excelMiddleware.js"
-import { ExcelExportPayload } from "./interfaces/excel.js"
-import { excelService } from "../services/excelService.js"
-import { HttpError } from "../lib/error/Error.js"
+import { isAdmin } from "../middlewares/authMiddleware"
+import { JwtAuth } from "../lib/utils/authHelpers"
+import { setResponseExcelHeaders } from "../middlewares/excelMiddleware"
+import { ExcelExportPayload } from "./interfaces/excel"
+import { excelService } from "../services/excelService"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 

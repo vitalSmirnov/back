@@ -1,5 +1,5 @@
-import { Group } from "../../models/group.js"
-import { Pagination } from "../Pagination.js"
+import { Group } from "../../models/group"
+import { Pagination } from "../Pagination"
 
 interface GroupFilters {
   identifier?: string

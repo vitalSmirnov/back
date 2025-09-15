@@ -1,5 +1,5 @@
-import { LoginCredentials, RegisterCredentials } from "../../domain/dto/Authorization/LoginCredentials.js"
-import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse.js"
+import { LoginCredentials, RegisterCredentials } from "../../domain/dto/Authorization/LoginCredentials"
+import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse"
 
 export interface RegisterPayload extends RegisterCredentials {}
 export interface RegisterResponse extends TokenResponse {}

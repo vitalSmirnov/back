@@ -1,6 +1,6 @@
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
-import { GetCourseRepositoryPayload, GetCourseRepositoryResponse } from "./interfaces/course.js"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
+import { GetCourseRepositoryPayload, GetCourseRepositoryResponse } from "./interfaces/course"
 
 export async function getCoursesRepository({
   identifier,

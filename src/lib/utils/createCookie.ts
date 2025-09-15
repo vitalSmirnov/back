@@ -1,4 +1,4 @@
-import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse.js"
+import { TokenResponse } from "../../domain/dto/Authorization/TokenResponse"
 import { Response } from "express"
 
 // Add cookie helpers

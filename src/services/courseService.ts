@@ -1,5 +1,5 @@
-import { getCoursesRepository } from "../repository/courseRepository.js"
-import { GetCourseServicePayload, GetCourseServiceResponse } from "./interfaces/course.js"
+import { getCoursesRepository } from "../repository/courseRepository"
+import { GetCourseServicePayload, GetCourseServiceResponse } from "./interfaces/course"
 
 export async function getCoursesService({
   identifier,

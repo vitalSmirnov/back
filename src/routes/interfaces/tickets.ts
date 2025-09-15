@@ -8,7 +8,7 @@ import {
   GetTicketsResponse,
   UpdateTicketInfoPayload,
   UpdateTicketInfoResponse,
-} from "../../domain/dto/Tickets/Tickets.js"
+} from "../../domain/dto/Tickets/Tickets"
 
 export interface GetTicketListPayload extends GetTicketsPayload {}
 export interface GetTicketListResponse extends GetTicketsResponse {}

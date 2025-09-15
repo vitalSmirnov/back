@@ -1,6 +1,6 @@
 import { type Request, type Response, type NextFunction } from "express"
-import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
-import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
+import { UserRoleEnum } from "../domain/models/UserRoleEnum"
+import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader"
 
 export function isAdmin(req: Request, res: Response, next: NextFunction) {
   const decoded = getRoleFromHeaders(req.headers.authorization!)

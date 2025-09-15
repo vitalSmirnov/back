@@ -1,18 +1,18 @@
 import express, { type Request, type Response } from "express"
-import { isAdmin } from "../middlewares/authMiddleware.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { CreateTicketInfoPayload, CreateTicketInfoResponse } from "../domain/dto/Tickets/Tickets.js"
+import { isAdmin } from "../middlewares/authMiddleware"
+import { StatusEnum } from "../domain/models/StatusEnum"
+import { CreateTicketInfoPayload, CreateTicketInfoResponse } from "../domain/dto/Tickets/Tickets"
 
-import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
-import { JwtAuth } from "../lib/utils/authHelpers.js"
+import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader"
+import { JwtAuth } from "../lib/utils/authHelpers"
 import {
   changeStatusTicketService,
   createTicketService,
   getTicketIdService,
   getTicketListService,
   updateTicketService,
-} from "../services/ticketsService.js"
-import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
+} from "../services/ticketsService"
+import { ErrorResponse } from "../domain/dto/ErrorResponse"
 import {
   ChangeStatusTicketPayload,
   ChangeStatusTicketResponse,
@@ -21,8 +21,8 @@ import {
   GetTicketListResponse,
   UpdateTicketPayload,
   UpdateTicketResponse,
-} from "./interfaces/tickets.js"
-import { HttpError } from "../lib/error/Error.js"
+} from "./interfaces/tickets"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 router.use(JwtAuth)

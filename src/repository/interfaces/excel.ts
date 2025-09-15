@@ -1,6 +1,6 @@
 import { TicketReason, TicketStatus } from "@prisma/client"
-import { UserRole } from "../../domain/models/UserRoleEnum.js"
-import { Prove } from "../../domain/models/prove.js"
+import { UserRole } from "../../domain/models/UserRoleEnum"
+import { Prove } from "../../domain/models/prove"
 
 export interface ExcelRepositoryExportPayload {
   endDate?: string

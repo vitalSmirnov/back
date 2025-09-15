@@ -1,11 +1,11 @@
-import { uploadSingle, handleUploadError } from "../middlewares/uploadMiddleware.js"
+import { uploadSingle, handleUploadError } from "../middlewares/uploadMiddleware"
 import { type Request, type Response } from "express"
-import { JwtAuth } from "../lib/utils/authHelpers.js"
+import { JwtAuth } from "../lib/utils/authHelpers"
 import express from "express"
-import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
-import { FileUploadResponse } from "./interfaces/uploadFiles.js"
-import { uploadFilesService } from "../services/uploadFilesService.js"
-import { HttpError } from "../lib/error/Error.js"
+import { ErrorResponse } from "../domain/dto/ErrorResponse"
+import { FileUploadResponse } from "./interfaces/uploadFiles"
+import { uploadFilesService } from "../services/uploadFilesService"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 router.use(JwtAuth)

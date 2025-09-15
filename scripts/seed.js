@@ -1,6 +1,6 @@
-import prisma from "../src/prisma.js"
+import prisma from "../src/prisma"
 import { fileURLToPath } from "url"
-import { Admins, Courses, Groups } from "./initialSchemas.js"
+import { Admins, Courses, Groups } from "./initialSchemas"
 
 export async function main() {
   // helper: deterministic-ish password hash (salt:hash)

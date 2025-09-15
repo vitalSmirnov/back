@@ -1,6 +1,6 @@
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { HttpError } from "../lib/error/Error.js"
+import { ReasonEnum } from "../domain/models/ReasonEnum"
+import { StatusEnum } from "../domain/models/StatusEnum"
+import { HttpError } from "../lib/error/Error"
 import {
   DeleteUserServicePayload,
   DeleteUserServiceResponse,
@@ -16,7 +16,7 @@ import {
   MeInfoServiceResponse,
   RejectRoleServicePayload,
   RejectRoleServiceResponse,
-} from "./interfaces/users.js"
+} from "./interfaces/users"
 import {
   getUsersRepository,
   getUserByNameRepository,
@@ -25,7 +25,7 @@ import {
   grantRoleRepository,
   rejectRoleRepository,
   meInfoRepository,
-} from "../repository/usersRepository.js"
+} from "../repository/usersRepository"
 
 export async function getUsersService({
   userName,

@@ -1,11 +1,7 @@
-import { GetTicketsPayload } from "../../domain/dto/Tickets/Tickets.js"
+import { GetTicketsPayload } from "../../domain/dto/Tickets/Tickets"
 import { TicketReason, TicketStatus } from "@prisma/client"
-import { Prove } from "../../domain/models/prove.js"
-import { Ticket } from "../../domain/models/ticket.js"
-import { User } from "../../domain/models/user.js"
-import { UserRole } from "../../domain/models/UserRoleEnum.js"
-import { Group } from "../../domain/models/group.js"
-import { Course } from "../../domain/models/course.js"
+import { Prove } from "../../domain/models/prove"
+import { UserRole } from "../../domain/models/UserRoleEnum"
 
 // Detailed interfaces for ticket responses
 export interface TicketUser {

@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express"
-import { JwtAuth, JwtRefreshAuth } from "../lib/utils/authHelpers.js"
-import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader.js"
-import { setAuthCookies } from "../lib/utils/createCookie.js"
-import { ErrorResponse } from "../domain/dto/ErrorResponse.js"
+import { JwtAuth, JwtRefreshAuth } from "../lib/utils/authHelpers"
+import { getRoleFromHeaders } from "../lib/utils/getRoleFromHeader"
+import { setAuthCookies } from "../lib/utils/createCookie"
+import { ErrorResponse } from "../domain/dto/ErrorResponse"
 import {
   LoginPayload,
   LoginResponse,
@@ -10,9 +10,9 @@ import {
   RefreshResponse,
   RegisterPayload,
   RegisterResponse,
-} from "./interfaces/auth.js"
-import { loginService, refreshService, registerService } from "../services/authService.js"
-import { HttpError } from "../lib/error/Error.js"
+} from "./interfaces/auth"
+import { loginService, refreshService, registerService } from "../services/authService"
+import { HttpError } from "../lib/error/Error"
 
 const router = express.Router()
 

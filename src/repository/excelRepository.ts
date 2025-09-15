@@ -1,7 +1,7 @@
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { HttpError } from "../lib/error/Error.js"
-import prisma from "../prisma.js"
-import { ExcelRepositoryExportPayload, ExcelRepositoryExportResponse } from "./interfaces/excel.js"
+import { StatusEnum } from "../domain/models/StatusEnum"
+import { HttpError } from "../lib/error/Error"
+import prisma from "../prisma"
+import { ExcelRepositoryExportPayload, ExcelRepositoryExportResponse } from "./interfaces/excel"
 
 export async function excelRepository({
   endDate,

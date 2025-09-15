@@ -1,7 +1,6 @@
-import { GetTicketsPayload } from "../domain/dto/Tickets/Tickets.js"
-import { ReasonEnum } from "../domain/models/ReasonEnum.js"
-import { StatusEnum } from "../domain/models/StatusEnum.js"
-import { UserRoleEnum } from "../domain/models/UserRoleEnum.js"
+import { ReasonEnum } from "../domain/models/ReasonEnum"
+import { StatusEnum } from "../domain/models/StatusEnum"
+import { UserRoleEnum } from "../domain/models/UserRoleEnum"
 import {
   ChangeStatusTicketServicePayload,
   ChangeStatusTicketServiceResponse,
@@ -13,8 +12,8 @@ import {
   GetTicketListServiceResponse,
   UpdateTicketServicePayload,
   UpdateTicketServiceResponse,
-} from "./interfaces/tickets.js"
-import { HttpError } from "../lib/error/Error.js"
+} from "./interfaces/tickets"
+import { HttpError } from "../lib/error/Error"
 import {
   createTicketRepository,
   findTicketByIdRepository,
@@ -23,7 +22,7 @@ import {
   updateTicketRepository,
   changeStatusTicketRepository,
   findTicketWithStatusRepository,
-} from "../repository/ticketsRepository.js"
+} from "../repository/ticketsRepository"
 
 export async function getTicketListService({
   roles,
