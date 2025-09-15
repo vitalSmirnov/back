@@ -1,6 +1,6 @@
 {
   "watch": ["src"],
-  "ext": ".js",
-  "ignore": [],
-  "exec": "tsc && node dist/index.js"
+  "ext": "ts,js,json",
+  "ignore": ["dist", "node_modules"],
+  "exec": "ts-node-dev --respawn --transpile-only src/index.ts"
 }

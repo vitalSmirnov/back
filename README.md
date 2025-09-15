@@ -32,3 +32,7 @@ The server will run on [http://localhost:8000/api](http://localhost:8000/api) by
 ## Health Check
 
 Visit [http://localhost:8000/health](http://localhost:8000/health) to check if the server is running.
+
+## Swagger
+
+If you want to see all routes with

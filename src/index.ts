@@ -3,6 +3,8 @@
 import express from "express"
 import routes from "./routes.js"
 import cookieParser from "cookie-parser"
+import swaggerUi from "swagger-ui-express"
+import swaggerSpec from "./swagger.js"
 import cors from "cors"
 
 const app = express()
@@ -27,7 +29,6 @@ app.use(
   express.static("uploads")
 )
 
-// fix the /api middleware signature to call next()
 app.use(
   "/api",
   (req, res, next) => {
@@ -36,6 +37,9 @@ app.use(
   },
   routes
 )
+
+// Swagger UI setup, default route is localhost:8000/api/documentation
+app.use("/api/documentation", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 app.listen(PORT, "0.0.0.0", 0, () => {
   console.log(`Server running on port ${PORT}`)
