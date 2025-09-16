@@ -9,6 +9,7 @@ import {
   RefreshRepositoryPayload,
   RefreshRepositoryResponse,
 } from "./interfaces/auth"
+import { comparePassword, hashPassword } from "../lib/utils/passwordEncryptor"
 
 export async function registerRepository({
   login,
@@ -16,6 +17,7 @@ export async function registerRepository({
   password,
   group,
 }: RegisterRepositoryPayload): Promise<RegisterRepositoryResponse> {
+  const hanshedPassword = await hashPassword(password)
   try {
     const existingUser = await prisma.user.findUnique({
       where: { login },
@@ -29,7 +31,7 @@ export async function registerRepository({
       data: {
         login,
         name,
-        password,
+        password: hanshedPassword,
         role: [UserRole.STUDENT],
         group: { connect: { id: group } },
       },
@@ -67,8 +69,9 @@ export async function loginRepository({ login, password }: LoginRepositoryPayloa
     if (!user) {
       throw new HttpError("Пользователь с таким логином не существует", 401)
     }
+    const isPasswordRight = await comparePassword(password, user.password)
 
-    if (password !== user.password) {
+    if (isPasswordRight) {
       throw new HttpError("Неправильный пароль или логин", 401)
     }
 
