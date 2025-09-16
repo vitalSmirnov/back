@@ -115,8 +115,10 @@ export async function getUserRepository({ id, login }: UserRepositoryPayload): P
 
     if (!user) return null
 
+    const { password, ...userWithoutPassword } = user
+
     return {
-      ...user,
+      ...userWithoutPassword,
       tickets: user.tickets.map(ticket => ({
         ...ticket,
         reason: ticket.reason as ReasonEnum,

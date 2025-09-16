@@ -71,7 +71,7 @@ export async function loginRepository({ login, password }: LoginRepositoryPayloa
     }
     const isPasswordRight = await comparePassword(password, user.password)
 
-    if (isPasswordRight) {
+    if (!isPasswordRight) {
       throw new HttpError("Неправильный пароль или логин", 401)
     }
 
