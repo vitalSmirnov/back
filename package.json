@@ -7,7 +7,8 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "update db": "node scripts/seed",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "seed": "node ./scripts/seed.cjs"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",
@@ -23,6 +24,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/exceljs": "^0.5.3",
     "@types/express": "^5.0.3",

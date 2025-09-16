@@ -8,7 +8,11 @@ This is a simple Node.js API server using Express.
 
 2. Create an database with command: `docker compose up --build --force-recreate `
 
-3. Fillup db with seed script, located into ./scripts/script.js. If you need to change initial data look into ./scripts/initialSeed.js
+3. Fillup db with seed, located into ./scripts.initialSchamas.json. In package.json existed script for seeding db.
+
+```sh
+npm run seed
+```
 
 4. Install dependencies:
 
