@@ -49,6 +49,7 @@ export async function registerRepository({
     if (e instanceof HttpError) {
       throw e
     }
+    console.error(e)
     throw new HttpError("Ошибка базы данных", 500)
   }
 }

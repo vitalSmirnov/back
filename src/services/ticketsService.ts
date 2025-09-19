@@ -76,7 +76,10 @@ export async function getTicketIdService({
 
   if (!ticket) throw new HttpError("Заявка не найдена", 404)
 
-  if (!roles.includes(UserRoleEnum.ADMIN) && ticket.user.id !== userId) throw new HttpError("Доступ запрещен", 403)
+  console.log(roles, ticket.user.id, userId)
+
+  if (!roles.includes(UserRoleEnum.ADMIN) && !roles.includes(UserRoleEnum.PROFESSOR) && ticket.user.id !== userId)
+    throw new HttpError("Доступ запрещен", 403)
 
   return {
     ...ticket,

@@ -1,7 +1,7 @@
 import { Course } from "@prisma/client"
 
 export interface GetCourseRepositoryPayload {
-  identifier?: number
+  group?: string
   limit?: string
   offset?: string
 }
